@@ -1,14 +1,34 @@
-var GameTimer = createClass({
-	_name		: "Timer"
-});
 
+createPackage("asg");
+
+asg.createClass({
+    _name           : "Interface",
+    _virtual        : true,
+    
+    drawBoard       : {_method: null},
+    drawMove        : {_method: null}
+}); 
 /*****************************************************************************/
-
-var Board = createClass({
+/*
+ * 
+ */
+asg.createClass({
 	_name           : "Board",
 	
-	squares         : {_type: "Collection", _getter: true},
+    interface       : {_type: "asg.Interface", _getter: true},
+	squares         : {_type: "std.collection.Collection", _getter: true},
 	
+    addSquare       : {
+        _method: function(_p) {
+            
+           if (implements("Square"))
+        }
+    },
+    
+    draw            : {
+    
+    },
+            
 	constructor 	: {
         _method: function(_p) {
             this.squares  =  new MapArray("Square");
@@ -20,7 +40,7 @@ var Board = createClass({
 /*
  * 
  */
-var Square = createClass({
+asg.createClass({
 	
 	_name           : "Square",
 	
@@ -36,7 +56,7 @@ var Square = createClass({
 /*
  * 
  */
-var Pawn = createClass({
+asg.createClass({
 	
 	_name           : "Pawn",
 	
@@ -53,12 +73,18 @@ var Pawn = createClass({
 /*
  * 
  */
-var PawnPools = createClass({
+asg.createClass({
   
-	_name           : "PawnPools",
-	id              : {_type: "String", _getter: true, _setter: true},
+	_name           : "PawnsPool",
+    id              : {_type: "std.misc.Id", _getter: true},
 	name            : {_type: "String", _getter: true, _setter: true},
-	pawns           : {_type: "Collection", _getter: true, _setter: true}
+	pawns           : {_type: "std.collection.Collection", _getter: true, _setter: true},
+    
+    constructor     : {
+        _method : function(_p) {
+            this.id = new Id();
+        }
+    }
   
 });
 /*****************************************************************************/
@@ -67,7 +93,7 @@ var PawnPools = createClass({
 /*
  * 
  */
-var Referee  = createClass({
+asg.createClass({
 
     _name               : "Referee"
     
@@ -79,10 +105,13 @@ var Referee  = createClass({
 /*
  * 
  */
-var Game  = createClass({
+asg.createClass({
 	_name               : "Referee",
 
-	board               : {_type: "Board"}
+	board               : {_type: "Board"},
+    pawnsPools          : {_type: "Collection"}
+    
+    
 
 });
 /*****************************************************************************/
@@ -91,8 +120,8 @@ var Game  = createClass({
 /*
  * 
  */
-var Turn  = createClass({
-    _name				: "Move",    
+asg.createClass({
+    _name				: "Turn",    
     
     actions             : {_type: "Collection", _getter: true, _setter: true}
     
@@ -104,7 +133,7 @@ var Turn  = createClass({
 /*
  * 
  */
-var Action  = createClass({
+asg.createClass({
     
     _name				: "Action",
             

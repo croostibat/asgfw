@@ -1,0 +1,40 @@
+This is the description of the structured comments. 
+It's not meant to be processed or parsed (but who knows!, in the future...) like Javadoc.
+
+CLASSES 
+
+@class name shortDescription
+- shortDescription (optional)
+@method name shortDescription
+- shortDescription (optional)
+@attribute name shortDescription
+- shortDescription (optional)
+
+FUNCTIONS 
+
+@function name shortDescription
+- shortDescription (optional)
+
+MISC
+
+@note note
+@todo description of the "todo" tasks
+
+PARAMETERS OF METHODS AND FUNCTIONS
+
+@param name(type, presence, values) shortDescription
+- type (mandatory): * (for any type), String, Boolean, Date, Function, {} (for objects), [] (for arrays), @class name, @object name
+- presence (mandatory): optional, mandatory
+- valuesList (optional): description of the allowed values
+@return typeOfReturn
+
+OBJECTS 
+This type of comment is used to describe a complex object.
+
+@object name shortDescription
+- shortDescription (optional)
+@element name(type, presence, valuesList) shortDescription
+- name: string or regular expression
+- type (mandatory): * (for any type), String, Boolean, Date, Function, {} (for objects), [] (for arrays), @class name, @object name
+- presence (mandatory): optional, mandatory, + (from 1 to n), * (from 0 to n)
+- valuesList (optional)

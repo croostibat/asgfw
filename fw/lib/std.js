@@ -1,17 +1,15 @@
-/*****************************************************************************/
+createPackage("std");
+createPackage("std.chainer");
+createPackage("std.collection");
+createPackage("std.proc");
+createPackage("std.misc");
 /*
  * 
  */
-
-createPackage("std");
-std.createPackage("chainer");
-std.createPackage("collection");
-std.createPackage("proc");
-std.createPackage("misc");
-
-std.chainer.createClass({
+createClass({
 	
 	_name		: "Node",
+    _package    : "std.chainer",
     
 	parent		: {_type: "Object", _getter:true, _setter:true},
 	
@@ -36,8 +34,9 @@ std.chainer.createClass({
 /*
  * 
  */
-std.collection.createClass({
+createClass({
     _name       : "Stack",
+    _package    : "std.collection",
     _virtual    : true,
     
     head        : {_method: null},
@@ -53,8 +52,9 @@ std.collection.createClass({
 /*
  *
  */
-std.collection.createClass({
+createClass({
     _name           : "Collection",
+    _package        : "std.collection",
     _virtual        : true,
     foreach         : {_method: null},
     isSet           : {_method: null},
@@ -66,9 +66,10 @@ std.collection.createClass({
 /*
  * 
  */
-std.collection.createClass({
+createClass({
 	
 	_name           : "MapArray",
+    _package        : "std.collection",
     _implements     : ["std.collection.Collection"],
     
     length          : {_type: "Number", _getter: true},    
@@ -154,7 +155,6 @@ std.collection.createClass({
 		}
 	}
 });
-/*****************************************************************************/
 
 /*****************************************************************************/
 /* FUNCTION 
@@ -163,9 +163,10 @@ std.collection.createClass({
  * Constructor
  * fn (Function) :
  */
-std.proc.createClass({
+createClass({
 	
 	_name       : "Callback",
+    _package    : "std.proc",
 	fn          : {_type: "Function",_getter: true, _setter: true},
 	params      : {_type: "Object",_getter: true, _setter: true},
 	
@@ -197,9 +198,10 @@ std.proc.createClass({
 /* Fonction synchrone / asynchrone encapsul�es 
  * 
  */
-std.proc.createClass({
+createClass({
 	_name			: "Job",
-	
+	_package        : "std.proc",
+    
 	mainCallback	: {_type: "std.proc.Callback", _getter: true, _setter: true},
 	onEndCallback	: {_type: "std.proc.Callback", _getter: true, _setter: true},	
     async         	: {_type: "Boolean"},
@@ -240,9 +242,9 @@ std.proc.createClass({
 /* @class Event
  * 
  */
-std.proc.createClass({
+createClass({
 	_name               : "Event",
-    
+    _package            : "std.proc",
     /* @attributes
      * _p.callback (Procedure)  : the procedure to be set as the callback */
     callback            : {_type: "std.proc.Callback", _getter: true, _setter: true, _autoSet: true},
@@ -283,9 +285,10 @@ std.proc.createClass({
 /*
  * 
  */
-std.misc.createClass({
+createClass({
 	
 	_name           : "Id",
+    _package        : "std.misc",
 	value           : {_type: "String", _getter: true},
     
     getRandomChar   : {

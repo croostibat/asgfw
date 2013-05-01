@@ -1,16 +1,16 @@
 createPackage("ui");
-ui.createPackage("base");
-ui.createPackage("container");
-ui.createPackage("std");
-ui.createPackage("form");
-
+createPackage("ui.base");
+createPackage("ui.container");
+createPackage("ui.std");
+createPackage("ui.form");
 /*****************************************************************************/
 /* @class ui.Event
  * 
  */
-ui.createClass({
+createClass({
     
 	_name               : "Event",
+    _package            : "ui",
     _extends            : ["std.proc.Event"],
 
     /* @attributes 
@@ -31,9 +31,10 @@ ui.createClass({
 /* @class ui.Brick
  * 
  */
- ui.base.createClass({
-	_name 			: "Brick",
-	_extends		: ["std.chainer.Node"],
+ createClass({
+	_name               : "Brick",
+    _package            : "ui.base",
+	_extends            : ["std.chainer.Node"],
     
     className           : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
@@ -155,8 +156,9 @@ ui.createClass({
 /*
  * 
  */
-ui.base.createClass({
+createClass({
 	_name 			: "Container",
+    _package        : "ui.base",
 	_extends		: ["ui.base.Brick"],
     
     domRootChildren : {_type: "Object", _getter: true, _setter: true},
@@ -191,8 +193,9 @@ ui.base.createClass({
 /*
  *
  */
-ui.container.createClass({
+createClass({
 	_name 			: "Window",
+    _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
 	
     constructor     : {
@@ -218,8 +221,9 @@ ui.container.createClass({
 /*
  *
  */
-ui.container.createClass({
+createClass({
 	_name 			: "Pane",
+    _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
 	
     constructor     : {
@@ -241,8 +245,9 @@ ui.container.createClass({
 /*
  * 
  */
- ui.container.createClass({
+createClass({
 	_name 			: "PaneH",
+    _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
     
     nbColumns       : {_type: "Number", _autoSet: true},    
@@ -287,8 +292,9 @@ ui.container.createClass({
 /*
  * 
  */
-ui.container.createClass({
+createClass({
 	_name 			: "PanesV",
+    _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
     
     nbRows          : {_type: "Number", _autoSet: true},
@@ -333,8 +339,9 @@ ui.container.createClass({
 /*
  * 
  */
-ui.container.createClass({
+createClass({
 	_name 			: "PanesS",
+    _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
     
     nbRows          : {_type: "Number", _autoSet: true},
@@ -405,8 +412,9 @@ ui.container.createClass({
 /*
  * 
  */
-ui.std.createClass({
+createClass({
 	_name 			: "Button",
+    _package        : "ui.std",
 	_extends		: ["ui.base.Container"],   
      
     label           : {_type: "ui.label", _getter: true},
@@ -431,8 +439,9 @@ ui.std.createClass({
 /*
  * 
  */
-ui.std.createClass({
+createClass({
 	_name 			: "Label",
+    _package        : "ui.std",
 	_extends		: ["ui.base.Brick"],
     
     constructor		: {
@@ -453,8 +462,9 @@ ui.std.createClass({
 /*
  * 
  */
-ui.std.createClass({
+createClass({
 	_name 			: "Image",
+    _package        : "ui.std",
 	_extends		: ["ui.base.Brick"],
     
     constructor		: {
@@ -475,8 +485,9 @@ ui.std.createClass({
 /*
  * 
  */
-ui.form.createClass({
+createClass({
 	_name 			: "TextArea",
+    _package        : "ui.form",
 	_extends		: ["ui.base.Brick"],
     
     constructor		: {

@@ -1,128 +1,3 @@
-/* Comments. This is the description of the structured comments. It's not meant to be processed or parsed (but who knows!, in the future...)
- * 
- * CLASSES 
- * 
- * @class name shortDescription
- * - shortDescription (optional)
- * @method name shortDescription
- * - shortDescription (optional)
- * @attribute name shortDescription
- * - shortDescription (optional)
- * 
- * FUNCTIONS 
- * 
- * @function name shortDescription
- * - shortDescription (optional)
- * 
- * MISC
- * 
- * @note note
- * @todo description of the "todo" tasks
- * 
- * PARAMETERS OF METHODS AND FUNCTIONS
- * 
- * @param name(type, presence, values) shortDescription
- * - type (mandatory): * (for any type), String, Boolean, Date, Function, {} (for objects), [] (for arrays), @class name, @object name
- * - presence (mandatory): optional, mandatory
- * - valuesList (optional): description of the allowed values
- * @return typeOfReturn
- * 
- * OBJECTS 
- * This type of comment is used to describe a complex object.
- * 
- * @object name shortDescription
- * - shortDescription (optional)
- * @element name(type, presence, valuesList) shortDescription
- * - name: string or regular expression
- * - type (mandatory): * (for any type), String, Boolean, Date, Function, {} (for objects), [] (for arrays), @class name, @object name
- * - presence (mandatory): optional, mandatory, + (from 1 to n), * (from 0 to n)
- * - valuesList (optional)
- * */
-
-/* @function isDefined return true if the object is defined (typeof !== undefined)
- * @param _object(*,mandatory) the object to be tested
- * @return boolean true 
- * */
-var isDefined = function(_object) {
-    return typeof(_object) !== "undefined";
-};
-
-/* @function clone 
- * @param _object(*, mandatory) 
- * @return {} a copy of the object
- * 
- * @todo make un function to clone an object without cloning the prototype (instance a new object and copy the values)
- * */
-var clone = function(_object) {
-	return eval(jsonize(_object));
-};
-
-/* @function implemetns
- * @param _type 
- * @parma _object
- * @return boolean true if the _object implements _type,false else
- * */
-var implements = function(_type,_object) {
-    
-    if (_object && _object._ && _object._._implements) {
-        return (!!_object._._implements[_type]);
-    }
-    else if (typeof(_object) === _type.toLowerCase()) {
-        return true;
-    }
-    else {
-        return (_type === "object");
-    }
-};
-
-/*
- *
- * */
-var instanceOf = function(_object) {
-    if (_object && _object._ && _object._._classDesc) {
-        return  _object._._classDesc._fullName;
-    }
-    else {
-        return typeof(_object);
-    }
-};
-
-/* @function jsonize
- * @param _object(*, mandatory) any javascript object
- * @param _paranthesis(boolean, optional) if true the result of the function is enclosed with parenthesis
- * */
-var jsonize = function(_object,_parenthesis) {
-    _parenthesis 	= (typeof(_parenthesis) === "undefined" ? true 	: false);
-
-	var prop,datas,result;
-    
-    if (_object === null) {
-		result = "null";
-	}
-	else {
-		switch(typeof(_object)) {
-			case "object":
-				datas = [];
-				for (prop in _object) {
-					datas[datas.length] =  prop + ":" + jsonize(_object[prop],false);
-				}
-				result = ("{" + datas.join( ",") + "}");
-				break;
-			case "function":
-				result = _object;
-				break;
-			case "string":
-				result = "\"" + _object.replace(/\"/gi,"\\\"") + "\"";
-				break;
-			default:
-				result = _object;
-				break;
-		}
-	}
-	return (_parenthesis ? "(" + result + ")" : result);
-};
-/*****************************************************************************/
-
 /*****************************************************************************/
 /* @object classDescription description of a class.
  * @note This structure is the description of a class. The names of system element are undescored. The others element are the descriptions of the attributes and methods of the class
@@ -164,12 +39,10 @@ var createClass = function(_classDesc) {
         _errors			: []
     };
         
-	if (typeof(_classDesc._name) === "string") {
+	if (typeof(_classDesc._name) === "string" && (typeof(_classDesc._package) === "string" || typeof(_classDesc._package) === "undefined")) {
         
         /* Completion of 2 importants attributes of the description
-         * _package, if not already set
          * _fullName, the concatanation _package+"."+_name */
-        _classDesc._package         = (_classDesc._package ? _classDesc._package : (instanceOf(this) === "Package" ? this.getFullName() : ""));
         _classDesc._fullName        = (_classDesc._package ? _classDesc._package + "." : "") + _classDesc._name;
         _classDesc._constructorName = "constructor_" + _classDesc._package.split(".").join("") + _classDesc._name;
 
@@ -385,37 +258,28 @@ var createClass_addAttributes = function(_classDesc, _type, _work) {
 	}
 	return _work;
 };
-/*****************************************************************************/
-
 
 /*****************************************************************************/
 /*
  * 
  */
-var createPackage = function(_name) {
-    eval("this." + _name + " =  new Package({name: _name, owner:this});");
-};
-
-/* 
- * 
- */
-var Package = function(_p) {
-    _p = (_p ? _p : {});
+var createPackage = function(_package) {
+    var i, packagePath,newPackage,code,splitter,pathSplitted;
     
-    this.name   = _p.name; 
-    this.owner  = _p.owner;
-};
-
-Package.prototype._                 = {_classDesc: {_name: "Package", _fullName: "Package"}, _implements: {"Package": true}};
-Package.prototype.createClass       = createClass;
-Package.prototype.createPackage     = createPackage;
-
-Package.prototype.getFullName   = function() {
-    if (instanceOf(this.owner) === "Package") {
-        return this.owner.getFullName() + "." + this.name;
+    splitter        = /^([A-Za-z0-9_.]+)\.([A-Za-z0-9_]+)$|^([A-Za-z0-9_]+)$/;
+    code            = "";
+    pathSplitted    = splitter.exec(_package);
+    
+    if (pathSplitted && pathSplitted.length === 4) {
+        packagePath = pathSplitted[3] ? "this" : "this." + pathSplitted[1];
+        newPackage  = pathSplitted[3] ? pathSplitted[3] : pathSplitted[2];
+        
+        if (eval("typeof(" + packagePath +")") === "object") {
+            eval(packagePath + "." + newPackage + " = {_owner : " + packagePath + ", _name : \"" + newPackage + "\"};");
+        }
+        else {
+            alert("The package " + packagePath + " doesn't exists. The package " + packagePath + "." + newPackage + " can't be created!");
+        }
     }
-    return this.name;
-};
-
-/*****************************************************************************/
-
+    return false;
+};  
