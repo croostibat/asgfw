@@ -1,8 +1,8 @@
-
 createPackage("asg");
 
-asg.createClass({
+createClass({
     _name           : "Interface",
+    _package        : "asg",
     _virtual        : true,
     
     drawBoard       : {_method: null},
@@ -12,9 +12,9 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
+createClass({
 	_name           : "Board",
-	
+	_package        : "asg",
     interface       : {_type: "asg.Interface", _getter: true},
 	squares         : {_type: "std.collection.Collection", _getter: true},
 	
@@ -40,10 +40,10 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
+createClass({
 	
 	_name           : "Square",
-	
+	_package        : "asg",
 	id              : {_type: "String", _getter:true, _setter: true},
 	name            : {_type: "String", _getter:true, _setter: true},
 	board           : {_type: "Board", _getter:true, _setter: true},
@@ -56,10 +56,10 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
+createClass({
 	
 	_name           : "Pawn",
-	
+	_package        : "asg",
 	id              : {_type: "String", _getter: true, _setter: true},
 	name            : {_type: "String", _getter: true, _setter: true},
 	player          : {_type: "Player", _getter: true, _setter: true},
@@ -73,9 +73,10 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
+createClass({
   
 	_name           : "PawnsPool",
+    _package        : "asg",
     id              : {_type: "std.misc.Id", _getter: true},
 	name            : {_type: "String", _getter: true, _setter: true},
 	pawns           : {_type: "std.collection.Collection", _getter: true, _setter: true},
@@ -93,10 +94,10 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
+createClass({
 
-    _name               : "Referee"
-    
+    _name           : "Referee",
+    _package        : "asg"
     
 });
 /*****************************************************************************/
@@ -105,11 +106,11 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
-	_name               : "Referee",
-
-	board               : {_type: "Board"},
-    pawnsPools          : {_type: "Collection"}
+createClass({
+	_name           : "Referee",
+    _package        : "asg",
+	board           : {_type: "Board"},
+    pawnsPools      : {_type: "Collection"}
     
     
 
@@ -120,10 +121,10 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
-    _name				: "Turn",    
-    
-    actions             : {_type: "Collection", _getter: true, _setter: true}
+createClass({
+    _name			: "Turn",    
+    _package        : "asg",
+    actions         : {_type: "Collection", _getter: true, _setter: true}
     
 });
 
@@ -133,11 +134,11 @@ asg.createClass({
 /*
  * 
  */
-asg.createClass({
+createClass({
     
-    _name				: "Action",
-            
-    type                : {_type: "Object", _static: true, _value: {move:"Move",set:"Set"}}
+    _name			: "Action",
+    _package        : "asg", 
+    type            : {_type: "Object", _static: true, _value: {move:"Move",set:"Set"}}
     
 });
 /*****************************************************************************/

@@ -1,22 +1,20 @@
 <html>
    
 <head>
-    <link href="../fw/default/ui.css" rel="stylesheet" type="text/css"/>
-    
-    <script LANGUAGE="Javascript" SRC="../fw/sys/env.js"> </script>
-    <script LANGUAGE="Javascript" SRC="../fw/sys/class.js"> </script>
-    <script LANGUAGE="Javascript" SRC="../fw/lib/std.js"> </script>
-    <script LANGUAGE="Javascript" SRC="../fw/lib/ui.js"> </script>
-    
+    <link href="../fw/default/ui.css" rel="stylesheet" type="text/css"/>    
+    <script LANGUAGE="Javascript" SRC="../fw/fw.js"> </script>
 </head>
 <body id="body">
 <script LANGUAGE="Javascript">
+    
+    include("../fw/lib/std.js");
+    include("../fw/lib/ui.js");
+    
     var body = document.getElementById("body");
-
     var containerS;
     containerS = new ui.container.PanesS({nbRows:3, nbColumns:3, panesSettings:{width: "50", height: "50"}});
     containerS.setRoot(body);
-
+    
 </script>
 </body>
 </html>

@@ -1,3 +1,103 @@
+var include = function(_filePath) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("get",_filePath,false);
+    xhr.onreadystatechange = function() {
+        if (this.status === 200) {
+            eval(this.responseText);
+        }
+    };
+    xhr.send();
+};
+
+/* @function isDefined return true if the object is defined (typeof !== undefined)
+ * @param _object(*,mandatory) the object to be tested
+ * @return boolean true 
+ * */
+var isDefined = function(_object) {
+    return typeof(_object) !== "undefined";
+};
+
+/* @function clone 
+ * @param _object(*, mandatory) 
+ * @return {} a copy of the object
+ * 
+ * @todo make un function to clone an object without cloning the prototype (instance a new object and copy the values)
+ * */
+var clone = function(_object) {
+    try{
+        return eval(jsonize(_object));
+    }
+	catch(e) {
+        
+    }
+};
+
+/* @function implemetns
+ * @param _type 
+ * @parma _object
+ * @return boolean true if the _object implements _type,false else
+ * */
+var implements = function(_type,_object) {
+    
+    if (_object && _object._ && _object._._implements) {
+        return (!!_object._._implements[_type]);
+    }
+    else if (typeof(_object) === _type.toLowerCase()) {
+        return true;
+    }
+    else {
+        return (_type === "object");
+    }
+};
+
+/*
+ *
+ * */
+var instanceOf = function(_object) {
+    if (_object && _object._ && _object._._classDesc) {
+        return  _object._._classDesc._fullName;
+    }
+    else {
+        return typeof(_object);
+    }
+};
+
+/* @function jsonize
+ * @param _object(*, mandatory) any javascript object
+ * @param _paranthesis(boolean, optional) if true the result of the function is enclosed with parenthesis
+ * */
+var jsonize = function(_object,_parenthesis) {
+    _parenthesis 	= (typeof(_parenthesis) === "undefined" ? true 	: false);
+
+	var prop,datas,result;
+    
+    if (_object === null) {
+		result = "null";
+	}
+	else {
+		switch(typeof(_object)) {
+			case "object":
+				datas = [];
+				for (prop in _object) {
+					datas[datas.length] =  prop + ":" + jsonize(_object[prop],false);
+				}
+				result = ("{" + datas.join( ",") + "}");
+				break;
+			case "function":
+				result = _object;
+				break;
+			case "string":
+				result = "\"" + _object.replace(/\"/gi,"\\\"") + "\"";
+				break;
+			default:
+				result = _object;
+				break;
+		}
+	}
+	return (_parenthesis ? "(" + result + ")" : result);
+};
+/*****************************************************************************/
+
 /*****************************************************************************/
 /* @object classDescription description of a class.
  * @note This structure is the description of a class. The names of system element are undescored. The others element are the descriptions of the attributes and methods of the class
@@ -28,7 +128,7 @@ var createClass = function(_classDesc) {
 	var newClass, work;
     
 	newClass    = null;
-            
+    
     /* Work is the object that contains the source code for the generation of the class. */
     work = {
         _class          : "",
@@ -276,10 +376,11 @@ var createPackage = function(_package) {
         
         if (eval("typeof(" + packagePath +")") === "object") {
             eval(packagePath + "." + newPackage + " = {_owner : " + packagePath + ", _name : \"" + newPackage + "\"};");
+            return true;
         }
         else {
             alert("The package " + packagePath + " doesn't exists. The package " + packagePath + "." + newPackage + " can't be created!");
         }
     }
     return false;
-};  
+};
