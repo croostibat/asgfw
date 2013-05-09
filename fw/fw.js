@@ -1,12 +1,51 @@
-var include = function(_filePath) {
+/* @function include synchronous load a file and evaluate its content
+ * @param _filePath(String ,mandatory) path of the file (relative to the server) to load
+ * */
+var loadFile = function(_filePath, _onLoad) {
     var xhr = new XMLHttpRequest();
     xhr.open("get",_filePath,false);
     xhr.onreadystatechange = function() {
         if (this.status === 200) {
-            eval(this.responseText);
+            _onLoad(this.responseText);
+        }
+        else {
+            return "";
         }
     };
     xhr.send();
+};
+
+var includeLib = function(_lib) {
+    loadFile("../fw/lib/" + _lib + ".js", function(_content) {
+        var head = document.getElementsByTagName("head");
+        var style = document.createElement("script");
+        style.innerHTML = _content;
+        head[0].appendChild(style);
+    });
+};
+var includePkg = function(_pkg) {
+    loadFile("../user/" + _pkg + ".js", function(_content) {
+        var head = document.getElementsByTagName("head");
+        var style = document.createElement("script");
+        style.innerHTML = _content;
+        head[0].appendChild(style);
+    });
+};
+var includeCss = function(_css) {
+    loadFile("../user/" + _css + ".css", function(_content) {
+        var head = document.getElementsByTagName("head");
+        var style = document.createElement("style");
+        style.innerHTML = _content;
+        head[0].appendChild(style);
+    });
+};
+
+/* @function isArray return true if the object is an []
+ * @param _object(*,mandatory) the object to be tested
+ * @return boolean null if the object is undefined else true, if the object is an [], or false
+ * */
+var isArray = function(_object) {
+    return (typeof(_object) === "undefined" ? null : (typeof(_object) === "object" && typeof(_object.length) === "number"));
 };
 
 /* @function isDefined return true if the object is defined (typeof !== undefined)
@@ -15,6 +54,22 @@ var include = function(_filePath) {
  * */
 var isDefined = function(_object) {
     return typeof(_object) !== "undefined";
+};
+
+/* @function isFunction return true if the object is a function 
+ * @param _object(*,mandatory) the object to be tested
+ * @return boolean null if the object is undefined else true, if the object is a function, or false
+ * */
+var isFunction = function(_object) {
+    return (typeof(_object) === "undefined" ? null : (typeof(_object) === "function"));
+};
+
+/* @function isString return true if the object is a string 
+ * @param _object(*,mandatory) the object to be tested
+ * @return boolean null if the object is undefined else true, if the object is a string, or false
+ * */
+var isString = function(_object) {
+    return (typeof(_object) === "undefined" ? null : (typeof(_object) === "string"));
 };
 
 /* @function clone 
@@ -32,7 +87,7 @@ var clone = function(_object) {
     }
 };
 
-/* @function implemetns
+/* @function implements
  * @param _type 
  * @parma _object
  * @return boolean true if the _object implements _type,false else
@@ -79,7 +134,12 @@ var jsonize = function(_object,_parenthesis) {
 			case "object":
 				datas = [];
 				for (prop in _object) {
-					datas[datas.length] =  prop + ":" + jsonize(_object[prop],false);
+                    if (typeof(_object) === "number") {
+                        datas[datas.length] =  prop + jsonize(_object[prop],false);
+                    }
+                    else  {
+                        datas[datas.length] =  "\"" + prop + "\":" + jsonize(_object[prop],false);
+                    }
 				}
 				result = ("{" + datas.join( ",") + "}");
 				break;
@@ -149,10 +209,10 @@ var createClass = function(_classDesc) {
         work._class = _classDesc._fullName;
         
         /* Verification the type of the elements _implements and extends */
-        if ((typeof(_classDesc._implements) === "undefined" ? null : (typeof(_classDesc._implements) === "object" && typeof(_classDesc._implements.length) === "number")) === false) {
+        if (isArray(_classDesc._implements) === false) {
             work._errors.push("the attribute _implements is not an []");
         }
-        if ((typeof(_classDesc._extends) === "undefined" ? null : (typeof(_classDesc._extends) === "object" && typeof(_classDesc._extends.length) === "number")) === false) {
+        if (isArray(_classDesc._extends) === false) {
             work._errors.push("the attribute _extends is not an []");           
         }
         
@@ -161,7 +221,7 @@ var createClass = function(_classDesc) {
          * 
          * The description of the class is added to the prototype. All the methods and the static attributes
          * will a reference of an element object ._.classDesc */
-        work._proto.push(work._class + ".prototype._ = {_classDesc : _classDesc};");
+        work._proto.push(work._class + ".prototype._ = {_classDesc : " + jsonize(_classDesc) + "};");
         
         work = createClass_addClass(_classDesc, "creation", work);
 	}
@@ -175,7 +235,7 @@ var createClass = function(_classDesc) {
     }
     else {
         /* Evaluation of the constructor and the prototypes array */
-        work._proto.push(work._class + ".prototype._._implements = work._implements;");
+        work._proto.push(work._class + ".prototype._._implements = " + jsonize(work._implements) + ";");
         eval(work._class + " = function (_p) { _p = (_p ? _p : {});" + work._const.join("")+ "};" + work._proto.join("") +"; newClass = " + work._class + ";");
         return newClass;
     }
@@ -220,7 +280,7 @@ var createClass_extendsClass = function(_classDesc, _list,_work) {
                 
                 /* Retrieve the class description */
                 classNameToAdd  = _classDesc[_list][index];
-				classDescToAdd  = eval("( typeof(" + classNameToAdd + ") !== \"undefined\" && " + classNameToAdd + ".prototype ? " + classNameToAdd + ".prototype._._classDesc" + " : null);");
+				classDescToAdd  = eval("(isDefined(" + classNameToAdd + ") && " + classNameToAdd + ".prototype ? " + classNameToAdd + ".prototype._._classDesc" + " : null);");
                 if (classDescToAdd && classDescToAdd._name) {
                     switch(_list) {
                         case "_implements":
@@ -281,19 +341,26 @@ var createClass_addAttributes = function(_classDesc, _type, _work) {
                     else {
                         /* If a value is defined in the description 
                          */
+                                      
+                        /* The statics attributes are shared by all the instances of a class.
+                         * So this kind of attributes are considered as prototype */        
                         switch(typeof(_classDesc[attribute]._value)) {
                             case "function" : 
                                 definition = attribute + " = " + _classDesc._fullName + ".prototype._._classDesc." + attribute + "._value();";
                                 break;
                             case "undefined":
-                                definition = attribute + " = (" + !!_classDesc[attribute]._autoSet + " && _p[\"" + attribute + "\"] ? _p[\"" + attribute + "\"] : null);";
+                                if (_classDesc[attribute]._autoSet === true) {
+                                    definition = attribute + " = (implements(\"" + _classDesc[attribute]._type + "\",_p[\"" + attribute + "\"]) ? _p[\"" + attribute + "\"] : null);";
+                                }
+                                else {
+                                    definition = attribute + " = null;"; 
+                                }
                                 break;
                             default:
                                 definition = attribute + " = " + _classDesc._fullName + ".prototype._._classDesc." + attribute + "._value;";
                                 break;
                         }
-                        /* The statics attributes are shared by all the instances of a class.
-                         * So this kind of attributes are considered as prototype */        
+  
                         if (_classDesc[attribute]._static) {
                             root = _work._class + ".prototype.";
                             _work._proto.push(root + definition);
@@ -302,7 +369,7 @@ var createClass_addAttributes = function(_classDesc, _type, _work) {
                             root = "this.";
                             _work._const.push(root + definition);
                         }
-
+                        
                         attributeFinalName = attribute.charAt(0).toUpperCase() + attribute.substring(1);
                         /* Add the setter method if asked */
                         if (_classDesc[attribute]._setter) {
@@ -320,6 +387,7 @@ var createClass_addAttributes = function(_classDesc, _type, _work) {
                         _work._added[attribute]._class  = _classDesc;
                     }
                 }
+                
                 /* Virtual Method */
                 else if (_classDesc[attribute]._method === null) {
                     if (_classDesc._virtual) {

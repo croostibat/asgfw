@@ -3,6 +3,7 @@ createPackage("std.chainer");
 createPackage("std.collection");
 createPackage("std.proc");
 createPackage("std.misc");
+
 /*
  * 
  */
@@ -11,7 +12,8 @@ createClass({
 	_name		: "Node",
     _package    : "std.chainer",
     
-	parent		: {_type: "Object", _getter:true, _setter:true},
+    children    : {_type: "std.collection.Collection", _getter: true},
+	parent		: {_type: "Object", _getter: true, _setter: true},
 	
     addChild	: { 
         _method: function(_object) {
@@ -167,8 +169,10 @@ createClass({
 	
 	_name       : "Callback",
     _package    : "std.proc",
-	fn          : {_type: "Function",_getter: true, _setter: true},
-	params      : {_type: "Object",_getter: true, _setter: true},
+    
+	fn          : {_type: "Function", _getter: true, _setter: true, _autoSet: true},
+    aa          : {_type: "*"},
+	params      : {_type: "*", _getter: true, _setter: true, _autoSet: true},
 	
     addParam    : {
         _method: function(_name, _value) {
@@ -185,7 +189,11 @@ createClass({
             return false;
 		}
     },
-    
+    constructor : {
+        _method : function(_p) {
+            
+        }
+    },
 	exec		: {
         _method: function(_params) {
 			if (instanceOf(this.fn) === "function") {
@@ -247,18 +255,15 @@ createClass({
     _package            : "std.proc",
     /* @attributes
      * _p.callback (Procedure)  : the procedure to be set as the callback */
-    callback            : {_type: "std.proc.Callback", _getter: true, _setter: true, _autoSet: true},
+    callback            : {_type: "std.proc.Callback", _getter: true, _setter: true, _autoSet: true, _autoInstance: true},
     
-    /* @method UiEvent.constructor(_p)
-     * _p.callbackFn (Function) : the main function to be called when the event will be triggered */
+    /* @method constructor(_p)
+     * _p.fn (Function, mandatory) : the main function to be called when the event will be triggered 
+     * _p.params(*,optional): this object will be passed to the main function when the event will be triggered
+     * */
     constructor         : {
         _method : function(_p) {
-            
-            this.callback = (this.callback ? this.callback : new Callback());
-            
-            if (instanceOf(_p.callbackFn) === "function") {                
-                this.callback.setFn(_p.callbackFn);
-            }
+            this.callback = (this.callback ? this.callback : new std.proc.Callback(_p));
         }
     },
     

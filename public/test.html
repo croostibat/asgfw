@@ -3,18 +3,50 @@
 <head>
     <link href="../fw/default/ui.css" rel="stylesheet" type="text/css"/>    
     <script LANGUAGE="Javascript" SRC="../fw/fw.js"> </script>
+    <script LANGUAGE="Javascript" SRC="../fw/lib/std.js"> </script>
+    <script LANGUAGE="Javascript" SRC="../fw/lib/ui.js"> </script>
+
 </head>
+
 <body id="body">
 <script LANGUAGE="Javascript">
     
-    include("../fw/lib/std.js");
-    include("../fw/lib/ui.js");
+//    includeLib("std");
+//    includeLib("ui");
+//    includePkg("asg");
+      includeCss("css");
+
+    var body = "";
     
-    var body = document.getElementById("body");
-    var containerS;
-    containerS = new ui.container.PanesS({nbRows:3, nbColumns:3, panesSettings:{width: "50", height: "50"}});
-    containerS.setRoot(body);
+    var mainContainer = new ui.container.PanesV({nbRows : 5});
+   
+    mainContainer.getPane(2).addUiElement(new ui.std.Text({className: "essai", value:"D&eacute;veloppeur exp&eacute;riment&eacute; - Chef de projet : Agile & Cr&eacute;atif",padding:"10px", paddingTop: "30px", paddingBottom: "30px",fontFamily:"sans-serif", fontSize:"28px", textAlign: "center"}));
+    mainContainer.setRoot(document.getElementById("body"));
     
+    var containerS = new ui.container.PanesS({
+        nbRows:20, 
+        nbColumns:20, 
+        panesSettings: {
+            width: "20", 
+            height: "20",
+            
+            onClick: function(){
+                var uiBrick = this.params.uiEvent.uiBrick;
+                if (uiBrick.getBackgroundColor() === "#F5F") {
+                    uiBrick.setBackgroundColor("#F00");
+                }
+                else {
+                    uiBrick.setBackgroundColor("#F5F");
+                }
+                uiBrick.applyStyles();
+            }
+        }
+    });
+    
+    mainContainer.getPane(3).addUiElement(containerS);
+    
+//    containerS.setRoot(body);
+
 </script>
 </body>
 </html>

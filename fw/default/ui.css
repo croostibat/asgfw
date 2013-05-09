@@ -1,27 +1,10 @@
 
-.uiLabel {
-    background-color:  transparent;
-    text-align : center;
-    width : 100%;
-    
-    -moz-user-select: -moz-none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-
-/* Standard fields - Default settings*/
-textArea {
-    padding     : 0;
-    margin      : 0;
-    overflow    : auto;
-    border      : 0;
-}
 
 div {
-    padding : 0;
+    
     margin : 0;
+    padding: 0px;
+
 }
 
 .uiContainerPane {
@@ -38,7 +21,12 @@ div {
     font-size:0px;
 }
 
+.uiContainerPaneV .uiContainerPane {
+    float   : none;
+}
+
 .uiContainerPaneH .uiContainerPane{
+    display: inline;
     float   : left;
 }
 
@@ -56,28 +44,7 @@ div {
     background-color:  #F0F;
 }
 
-.uiContainerPaneV .uiContainerPane{
-    float   : none;
-}
-
-
-.uiContainerWindow {
-    
-}
-
-.uiContainerWindow .buttonsBar {
-    
-}
-
-.uiContainerWindow .contents {
-    
-}
-
-.uiContainerWindow .statesBar {
-    
-}
-
-.uiHTMLButton {
+.uiStdButton {
     background-color:  #BBBBBB;
     border : 2px outset #BBBBBB;
     height : 20px;
@@ -85,7 +52,7 @@ div {
     cursor : pointer;
 }
 
-.uiHTMLButton .uiLabel {
+.uiStdButton .uiLabel {
     background-color:  transparent;
     text-align : center;
     width : 100%;
@@ -97,12 +64,25 @@ div {
     user-select: none;
 }
 
-.uiHTMLButton:hover {
+.uiStdButton:hover {
     background-color:  #DDDDDD;
     border : 2px outset #DDDDDD;
 }
 
-.uiHTMLButton:active {
+.uiStdButton:active {
     background-color:  #BBBBBB;
     border : 2px inset #DDDDDD;
+}
+
+
+.uiStdText {
+    background-color:  transparent;
+    text-align : center;
+    width : 100%;
+    
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }

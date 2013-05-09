@@ -1,0 +1,11 @@
+Description of class
+
+The description of a class allow the function createClass (fw.js) to build a javascript constructor (function).
+The description describe the attributes dans the methods.
+
+Attribute
+
+
+Auto getter / setter
+
+Auto settings
