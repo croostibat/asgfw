@@ -3,7 +3,6 @@ createPackage("ui.base");
 createPackage("ui.container");
 createPackage("ui.std");
 
-
 /* @class ui.Event
  * 
  * */
@@ -18,7 +17,7 @@ createClass({
     
     /* @method UiEvent.constructor(_p)
      * _p.callbackFn (Function) : the main function to be called when the event will be triggered */
-    constructor         : {
+    constructor         : {_type: "Method", 
         _method         : function(_p) {
             this.callback.addParam("uiEvent",this);
         }
@@ -36,13 +35,14 @@ createClass({
     className           : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     width               : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     height              : {_type: "String", _getter: true, _setter: true, _autoSet: true},    
+    
     padding             : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     paddingLeft         : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     paddingRight        : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     paddingTop          : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     paddingBottom       : {_type: "String", _getter: true, _setter: true, _autoSet: true},
-    margin              : {_type: "String", _getter: true, _setter: true, _autoSet: true},    
-
+    
+    margin              : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     marginLeft          : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     marginRight         : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     marginTop           : {_type: "String", _getter: true, _setter: true, _autoSet: true},
@@ -60,7 +60,7 @@ createClass({
     fontSize            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     textAlign           : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
-    applyStyles         : {_method: null}
+    applyStyles         : {_type: "Method", _method: null}
 });
 
 /*
@@ -74,7 +74,7 @@ createClass({
 	onActivate			: {_type: "ui.Event", _getter: true, _autoSet: true},
 	onClick             : {_type: "ui.Event", _getter: true, _autoSet: true},   
                    
-    applyEvents         : {_method: null}
+    applyEvents         : {_type: "Method", _method: null}
 });
 
 /*****************************************************************************/
@@ -92,7 +92,7 @@ createClass({
     domRoot             : {_type: "Object", _getter: true},
     domFirstElement     : {_type: "Object"},
     
-    constructor         : {
+    constructor         : {_type: "Method", 
         _method: function(_p) {
             this.children       = new std.collection.MapArray();
             this.domRoot        = _p.domRoot;
@@ -110,16 +110,15 @@ createClass({
     /* @method UiHTML.setRoot
      * @params
      */
-    setRoot         : {
+    setRoot         : {_type: "Method", 
         _method: function(_domRoot) {
             this.domRoot = _domRoot;
             this.domRoot.appendChild(this.domFirstElement);            
         }
     },
             
-    applyStyles     : {
-        _overloadable   : true,
-        _method     : function() {
+    applyStyles     : {_type: "Method", _overloadable   : true,
+        _method  : function() {
             if (this.domFirstElement) {
                 if (this.domFirstElement.className !== this.className) this.domFirstElement.className = this.className;
                 if (this.domFirstElement.style.width !== this.width) this.domFirstElement.style.width = this.width;
@@ -154,8 +153,7 @@ createClass({
         }
     },
             
-    applyEvents       : {
-        _overloadable   : true,
+    applyEvents       : {_type: "Method", _overloadable   : true,
         _method     : function() {
             if (this.onActivate) {
                 this.domFirstElement.onclick     = this.onActivate.getTrigger();
@@ -178,15 +176,13 @@ createClass({
     
     value               : {_type: "String", _getter: true, _autoSet: true},   
     
-    applyValues         : {
-        _overloadable   : true,
+    applyValues         : {_type: "Method", _overloadable   : true,
         _method     : function() {
             if (this.domFirstElement.innerHTML !== this.value) this.domFirstElement.innerHTML = this.value;
         }
     },
     
-    draw                : {
-        _overloadable   : true,
+    draw                : {_type: "Method", _overloadable   : true,
         _method: function() {
             this.applyEvents();
             this.applyStyles();
@@ -205,7 +201,7 @@ createClass({
     
     domRootChildren : {_type: "Object", _getter: true, _setter: true},
     
-    addUiElement   : {
+    addUiElement    : {_type: "Method",
         _method: function(_element) {
             if (implements("ui.base.Brick",_element)) {
                 this.addChild(_element);
@@ -214,8 +210,7 @@ createClass({
         }
     },
             
-    draw                : {
-        _overloadable   : true,
+    draw            : {_type: "Method", _overloadable   : true,
         _method: function() {
             this.applyEvents();
             this.applyStyles();
@@ -231,7 +226,7 @@ createClass({
     _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
 	
-    constructor     : {
+    constructor     : {_type: "Method", 
         _method : function(_p) {            
             
             this.className = (this.className ? this.className : "uiContainerPane");
@@ -241,7 +236,7 @@ createClass({
         }
     },
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function() {
             this.domFirstElement = document.createElement("div");                 
             this.setDomRootChildren(this.domFirstElement);
@@ -261,7 +256,7 @@ createClass({
     
     panesSettings   : {_type: "Object", _getter: true, _autoSet: true},
     
-    constructor     : {
+    constructor     : {_type: "Method", 
         _method: function(_p) {
             
             this.className = (this.className ? this.className : "uiContainerPaneH");
@@ -271,7 +266,7 @@ createClass({
         }
     },
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function() {
             var pane, spacer, i;
             
@@ -294,7 +289,7 @@ createClass({
         }
     },
     
-    getPane    : {
+    getPane    : {_type: "Method", 
         _method : function(_column) {
             return this.children.get(_column);
         }
@@ -313,7 +308,7 @@ createClass({
     
     panesSettings   : {_type: "Object", _getter: true, _autoSet: true},
     
-    constructor     : {
+    constructor     : {_type: "Method", 
         _method: function(_p) {;
             
             this.className = (this.className ? this.className : "uiContainerPaneV");
@@ -323,7 +318,7 @@ createClass({
         }
     },
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function() {
             var pane, spacer, i;
             this.domFirstElement = document.createElement("div");            
@@ -341,7 +336,7 @@ createClass({
         }
     },
     
-    getPane    : {
+    getPane    : {_type: "Method", 
         _method : function(_row) {
             return this.children.get(_row);
         }
@@ -361,7 +356,7 @@ createClass({
     
     panesSettings   : {_type: "Object", _getter: true, _autoSet: true},
     
-    constructor     : {
+    constructor     : {_type: "Method", 
         _method: function(_p) {
             this.className = (this.className ? this.className : "uiContainerPaneS");
             
@@ -370,7 +365,7 @@ createClass({
         }
     },
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function() {
             var pane, spacer, i, j;
             
@@ -391,8 +386,8 @@ createClass({
         }
     },
     
-    setRowHeight : {
-         _method : function(_row, _height) {
+    setRowHeight : {_type: "Method", 
+        _method : function(_row, _height) {
             var i, pane;
             for (i = 0; i < this.nbColumns; i++) {
                 pane = this.getPane(i, _row);
@@ -402,8 +397,8 @@ createClass({
         }
     },
     
-    setColumnWidth : {
-         _method : function(_column, _width) {
+    setColumnWidth : {_type: "Method", 
+        _method : function(_column, _width) {
              var i, pane;
             for (i = 0; i < this.nbRows; i++) {
                 pane = this.getPane(_column, i);
@@ -413,7 +408,7 @@ createClass({
         }
     },
     
-    getPane    : {
+    getPane    : {_type: "Method", 
         _method : function(_colum, _row) {
             return this.children.get(_colum + ":" + _row);
         }
@@ -430,14 +425,14 @@ createClass({
      
     label           : {_type: "ui.label", _getter: true},
     
-    constructor		: {
+    constructor		: {_type: "Method", 
         _method:function(_p) {
             this.build(_p);
             this.draw();
 		}
 	},
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function(_p) {
             this.domFirstElement = document.createElement("div");            
             this.setDomRootChildren(this.domFirstElement);
@@ -455,14 +450,14 @@ createClass({
     _package        : "ui.std",
 	_extends		: ["ui.base.Element"],
     
-    constructor		: {
+    constructor		: {_type: "Method", 
         _method:function(_p) {
             this.build();
             this.draw();
 		}
 	},
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function() {
             this.domFirstElement = document.createElement("div");            
             this.domFirstElement.className = "uiStdLabel";
@@ -478,14 +473,14 @@ createClass({
     _package        : "ui.std",
 	_extends		: ["ui.base.Element"],
     
-    constructor		: {
+    constructor		: {_type: "Method", 
         _method:function(_p) {
             this.build();
             this.draw();
 		}
 	},
     
-    build           : {
+    build           : {_type: "Method", 
         _method: function() {
             this.domFirstElement = document.createElement("img");            
             this.domFirstElement.className = "uiStdImage";

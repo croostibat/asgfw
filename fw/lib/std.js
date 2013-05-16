@@ -15,14 +15,14 @@ createClass({
     children    : {_type: "std.collection.Collection", _getter: true},
 	parent		: {_type: "Object", _getter: true, _setter: true},
 	
-    addChild	: { 
+    addChild	: {_type: "Method", 
         _method: function(_object) {
 	    	this.children.add(_object);
             _object.setParent(this);
     	}
     },
     
-    constructor		: { 
+    constructor		: {_type: "Method", 
         _method: function(_p) {
     		this.children = new std.collection.MapArray({type:"std.Node"});
     	}
@@ -41,10 +41,10 @@ createClass({
     _package    : "std.collection",
     _virtual    : true,
     
-    head        : {_method: null},
-    tail        : {_method: null},
-    push        : {_method: null},
-    pop         : {_method: null}
+    head        : {_type: "Method", _method: null},
+    tail        : {_type: "Method", _method: null},
+    push        : {_type: "Method", _method: null},
+    pop         : {_type: "Method", _method: null}
 });
 /*****************************************************************************/
 
@@ -58,11 +58,11 @@ createClass({
     _name           : "Collection",
     _package        : "std.collection",
     _virtual        : true,
-    foreach         : {_method: null},
-    isSet           : {_method: null},
-    set             : {_method: null},
-    get             : {_method: null},
-    drop            : {_method: null}
+    foreach         : {_type: "Method", _method: null},
+    isSet           : {_type: "Method", _method: null},
+    set             : {_type: "Method", _method: null},
+    get             : {_type: "Method", _method: null},
+    drop            : {_type: "Method", _method: null}
 });
 
 /*
@@ -79,7 +79,7 @@ createClass({
     type            : {_type: "String", _getter: true},
     autoKey         : {_type: "Number"},
     
-	foreach         : {
+	foreach         : {_type: "Method", 
         _method: function(_fn, _params) {
 			var key = null;
 			
@@ -91,19 +91,19 @@ createClass({
 		}
 	},
 	
-	isSet       : { 
+	isSet       : {_type: "Method", 
         _method: function(_key) {
 			return isDefined(this.objects[_key]);
 		}
 	},
 	
-	get         : { 
+	get         : {_type: "Method", 
         _method: function(_key) {
 			return this.objects[_key];
 		}	
 	},
 	
-	set 		: {
+	set 		: {_type: "Method", 
         _method: function(_object,_key) {
 			if (isDefined(_object) && (!this._type || is_type(_object,this._type))) {
 				if (!this.isSet(_key)) {
@@ -115,13 +115,13 @@ createClass({
 		}
 	},
     	
-	add 		: {
+	add 		: {_type: "Method", 
         _method:function(_object) {
 			return this.set(_object, this.getAutoKey());
 		}
 	},
     
-    getAutoKey     : {
+    getAutoKey     : {_type: "Method", 
         _method: function() {
             while(this.isSet(this.autoKey)) {
                 this.autoKey++;
@@ -130,13 +130,13 @@ createClass({
         }
     },
     
-    isSettable  : {
+    isSettable  : {_type: "Method", 
         _method: function(_object) {
             return (this.type || (instanceOf(_object,this.type)));
         }
     },
     
-	drop 		: {
+	drop 		: {_type: "Method", 
         _method: function() {
 			var object = null;
 			if (this.isSet(_key)) {
@@ -148,7 +148,7 @@ createClass({
 		}
 	},
 	
-	constructor : { 
+	constructor : {_type: "Method", 
         _method: function(_p) {
             this.length     = 0;
             this.objects    = {};
@@ -174,7 +174,7 @@ createClass({
     aa          : {_type: "*"},
 	params      : {_type: "*", _getter: true, _setter: true, _autoSet: true},
 	
-    addParam    : {
+    addParam    : {_type: "Method", 
         _method: function(_name, _value) {
             if (instanceOf(this.params) === "object") {
                 if (!this.params) {
@@ -189,12 +189,12 @@ createClass({
             return false;
 		}
     },
-    constructor : {
+    constructor : {_type: "Method", 
         _method : function(_p) {
             
         }
     },
-	exec		: {
+	exec		: {_type: "Method", 
         _method: function(_params) {
 			if (instanceOf(this.fn) === "function") {
 				this.fn(this.params, _params);
@@ -215,7 +215,7 @@ createClass({
     async         	: {_type: "Boolean"},
     period          : {_type: "number", _getter: true, _setter: true},
     
-    work 	: { 
+    work 	: {_type: "Method", 
         _method: function(_this) {
 	        _this = (_this ? _this : this);
 	        if (_this.async) {
@@ -227,7 +227,7 @@ createClass({
     	}
     },
     
-    exec	: { 
+    exec	: {_type: "Method", 
         _method: function(_this) {
 	        _this = (_this ? _this : this);
 	        mainCallback.exec();
@@ -235,8 +235,8 @@ createClass({
     	}
     },
     
-    constructor : {
-         _method: function(_p) {
+    constructor : {_type: "Method", 
+        _method: function(_p) {
              _p = _p ? _p : {};
              
              this.period = (_p.period ? _p.period : 50);
@@ -261,7 +261,7 @@ createClass({
      * _p.fn (Function, mandatory) : the main function to be called when the event will be triggered 
      * _p.params(*,optional): this object will be passed to the main function when the event will be triggered
      * */
-    constructor         : {
+    constructor         : {_type: "Method", 
         _method : function(_p) {
             this.callback = (this.callback ? this.callback : new std.proc.Callback(_p));
         }
@@ -269,14 +269,14 @@ createClass({
     
     /* @method UiEvent.getTrigger()
      * Return a standalone function which trigger the UiEvent. */
-    getTrigger          : {
+    getTrigger          : {_type: "Method", 
         _method: function() {
             var _this = this;
             return function(){ _this.callback.exec();};
 		}
     },
             
-	trigger             : {
+	trigger             : {_type: "Method", 
         _method: function(_p) {
             this.callback.exec();
 		}
@@ -296,20 +296,20 @@ createClass({
     _package        : "std.misc",
 	value           : {_type: "String", _getter: true},
     
-    getRandomChar   : {
+    getRandomChar   : {_type: "Method", 
         _method: function() {
             var n = (Math.floor(Math.random() * 26)+65);
             return String.fromCharCode(n);
         }
     },
     
-    generate        : {
+    generate        : {_type: "Method", 
         _method: function() {
             this.value = this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar()+this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar();
         }
     },
     
-	constructor		: { 
+	constructor		: {_type: "Method", 
         _method: function() {
             this.generate();
 		}
