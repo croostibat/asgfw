@@ -1,0 +1,19 @@
+
+.board {
+    background-color : #888;
+    height: 100%;
+    width : 100%;
+    
+}
+
+.slot {
+    background-color : #FFF;
+    height: 31%;
+    margin : 1%;
+    width : 31%;
+}
+
+.slot:hover {
+    background-color : #F55;
+}
+
