@@ -31,17 +31,16 @@ div {
 }
 
 .uiContainerPaneS {
-     background-color:  #FF0;     
+
 }
 
 .uiContainerPaneS .uiContainerPane{
     display: inline;
     float   : left;
-    background-color:  #F00;
 }
 
 .uiContainerPaneS .uiContainerPane:hover{
-    background-color:  #F0F;
+
 }
 
 .uiStdButton {

@@ -32,7 +32,9 @@ createClass({
     _package            : "ui.base",
     _virtual            : true,
     
-    className           : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    classSys            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    class               : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    
     width               : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     height              : {_type: "String", _getter: true, _setter: true, _autoSet: true},    
     
@@ -89,13 +91,13 @@ createClass({
     id                  : {_type: "std.Id", _getter: true},
     help                : {_type: "String", _getter: true, _autoSet: true},
     
-    domRoot             : {_type: "Object", _getter: true},
-    domFirstElement     : {_type: "Object"},
+    htmlHook            : {_type: "Object", _getter: true},
+    htmlFirstElement     : {_type: "Object"},
     
     constructor         : {_type: "Method", 
         _method: function(_p) {
             this.children       = new std.collection.MapArray();
-            this.domRoot        = _p.domRoot;
+            this.htmlHook        = _p.htmlHook;
             this.id             = new std.misc.Id();
             
             if (isFunction(_p.onActivate)) {
@@ -107,47 +109,49 @@ createClass({
         }
     },
     
-    /* @method UiHTML.setRoot
+    /* @method UiHTML.setHtmlHook
      * @params
      */
-    setRoot         : {_type: "Method", 
-        _method: function(_domRoot) {
-            this.domRoot = _domRoot;
-            this.domRoot.appendChild(this.domFirstElement);            
+    setHtmlHook     : {_type: "Method", 
+        _method: function(_htmlHook) {
+            this.htmlHook = _htmlHook;
+            this.htmlHook.appendChild(this.htmlFirstElement);            
         }
     },
             
     applyStyles     : {_type: "Method", _overloadable   : true,
         _method  : function() {
-            if (this.domFirstElement) {
-                if (this.domFirstElement.className !== this.className) this.domFirstElement.className = this.className;
-                if (this.domFirstElement.style.width !== this.width) this.domFirstElement.style.width = this.width;
-                if (this.domFirstElement.style.height !== this.height) this.domFirstElement.style.height = this.height;
+            if (this.htmlFirstElement) {
+                var className = this.classSys + (this.classSys ? " " : "") + (this.class ? this.class : "");
+                
+                if (this.htmlFirstElement.className !== className) this.htmlFirstElement.className = className;
+                if (this.htmlFirstElement.style.width !== this.width) this.htmlFirstElement.style.width = this.width;
+                if (this.htmlFirstElement.style.height !== this.height) this.htmlFirstElement.style.height = this.height;
 
-                if (this.domFirstElement.style.padding !== this.padding) this.domFirstElement.style.padding = this.padding;
-                if (this.paddingTop !== null && this.domFirstElement.style.paddingTop !== this.paddingTop) this.domFirstElement.style.paddingTop = this.paddingTop;
-                if (this.paddingBottom !== null && this.domFirstElement.style.paddingBottom !== this.paddingBottom) this.domFirstElement.style.paddingBottom = this.paddingBottom;
-                if (this.paddingLeft !== null && this.domFirstElement.style.paddingLeft !== this.paddingLeft) this.domFirstElement.style.paddingLeft = this.paddingLeft;
-                if (this.paddingRight !== null && this.domFirstElement.style.paddingRight !== this.paddingRight) this.domFirstElement.style.paddingRight = this.paddingRight;
+                if (this.htmlFirstElement.style.padding !== this.padding) this.htmlFirstElement.style.padding = this.padding;
+                if (this.paddingTop !== null && this.htmlFirstElement.style.paddingTop !== this.paddingTop) this.htmlFirstElement.style.paddingTop = this.paddingTop;
+                if (this.paddingBottom !== null && this.htmlFirstElement.style.paddingBottom !== this.paddingBottom) this.htmlFirstElement.style.paddingBottom = this.paddingBottom;
+                if (this.paddingLeft !== null && this.htmlFirstElement.style.paddingLeft !== this.paddingLeft) this.htmlFirstElement.style.paddingLeft = this.paddingLeft;
+                if (this.paddingRight !== null && this.htmlFirstElement.style.paddingRight !== this.paddingRight) this.htmlFirstElement.style.paddingRight = this.paddingRight;
 
-                if (this.domFirstElement.style.margin !== this.margin) this.domFirstElement.style.margin = this.margin;
-                if (this.marginTop !== null && this.domFirstElement.style.marginTop !== this.marginTop) this.domFirstElement.style.marginTop = this.marginTop;
-                if (this.marginBottom !== null && this.domFirstElement.style.marginBottom !== this.marginBottom) this.domFirstElement.style.marginBottom = this.marginBottom;
-                if (this.marginLeft !== null && this.domFirstElement.style.marginLeft !== this.marginLeft) this.domFirstElement.style.marginLeft = this.marginLeft;
-                if (this.marginRight !== null && this.domFirstElement.style.marginRight !== this.marginRight) this.domFirstElement.style.marginRight = this.marginRight;
+                if (this.htmlFirstElement.style.margin !== this.margin) this.htmlFirstElement.style.margin = this.margin;
+                if (this.marginTop !== null && this.htmlFirstElement.style.marginTop !== this.marginTop) this.htmlFirstElement.style.marginTop = this.marginTop;
+                if (this.marginBottom !== null && this.htmlFirstElement.style.marginBottom !== this.marginBottom) this.htmlFirstElement.style.marginBottom = this.marginBottom;
+                if (this.marginLeft !== null && this.htmlFirstElement.style.marginLeft !== this.marginLeft) this.htmlFirstElement.style.marginLeft = this.marginLeft;
+                if (this.marginRight !== null && this.htmlFirstElement.style.marginRight !== this.marginRight) this.htmlFirstElement.style.marginRight = this.marginRight;
 
-                if (this.borderBottomColor !== null && this.domFirstElement.style.borderBottomColor !== this.borderBottomColor) this.domFirstElement.style.borderBottomColor = this.borderBottomColor;
-                if (this.borderBottomWidth !== null && this.domFirstElement.style.borderBottomWidth !== this.borderBottomWidth) this.domFirstElement.style.borderBottomWidth = this.borderBottomWidth;
-                if (this.borderBottomStyle !== null && this.domFirstElement.style.borderBottomStyle !== this.borderBottomStyle) this.domFirstElement.style.borderBottomStyle = this.borderBottomStyle;
+                if (this.borderBottomColor !== null && this.htmlFirstElement.style.borderBottomColor !== this.borderBottomColor) this.htmlFirstElement.style.borderBottomColor = this.borderBottomColor;
+                if (this.borderBottomWidth !== null && this.htmlFirstElement.style.borderBottomWidth !== this.borderBottomWidth) this.htmlFirstElement.style.borderBottomWidth = this.borderBottomWidth;
+                if (this.borderBottomStyle !== null && this.htmlFirstElement.style.borderBottomStyle !== this.borderBottomStyle) this.htmlFirstElement.style.borderBottomStyle = this.borderBottomStyle;
 
-                if (this.backgroundColor !== null && this.domFirstElement.style.backgroundColor !== this.backgroundColor) this.domFirstElement.style.backgroundColor = this.backgroundColor;
-                if (this.borderColor !== null && this.domFirstElement.style.borderColor !== this.borderColor) this.domFirstElement.style.borderColor = this.borderColor;
-                if (this.color !== null && this.domFirstElement.style.color !== this.color) this.domFirstElement.style.color = this.color;
+                if (this.backgroundColor !== null && this.htmlFirstElement.style.backgroundColor !== this.backgroundColor) this.htmlFirstElement.style.backgroundColor = this.backgroundColor;
+                if (this.borderColor !== null && this.htmlFirstElement.style.borderColor !== this.borderColor) this.htmlFirstElement.style.borderColor = this.borderColor;
+                if (this.color !== null && this.htmlFirstElement.style.color !== this.color) this.htmlFirstElement.style.color = this.color;
 
-                if (this.domFirstElement.style.fontFamily !== this.fontFamily) this.domFirstElement.style.fontFamily = this.fontFamily;
-                if (this.domFirstElement.style.fontSize !== this.fontSize) this.domFirstElement.style.fontSize = this.fontSize;
+                if (this.htmlFirstElement.style.fontFamily !== this.fontFamily) this.htmlFirstElement.style.fontFamily = this.fontFamily;
+                if (this.htmlFirstElement.style.fontSize !== this.fontSize) this.htmlFirstElement.style.fontSize = this.fontSize;
 
-                if (this.domFirstElement.style.textAlign !== this.textAlign) this.domFirstElement.style.textAlign = this.textAlign;
+                if (this.htmlFirstElement.style.textAlign !== this.textAlign) this.htmlFirstElement.style.textAlign = this.textAlign;
 
             }
         }
@@ -156,10 +160,10 @@ createClass({
     applyEvents       : {_type: "Method", _overloadable   : true,
         _method     : function() {
             if (this.onActivate) {
-                this.domFirstElement.onclick     = this.onActivate.getTrigger();
+                this.htmlFirstElement.onclick     = this.onActivate.getTrigger();
             }
             if (this.onClick) {
-                this.domFirstElement.onclick     = this.onClick.getTrigger();
+                this.htmlFirstElement.onclick     = this.onClick.getTrigger();
             }
         }
     }
@@ -178,7 +182,7 @@ createClass({
     
     applyValues         : {_type: "Method", _overloadable   : true,
         _method     : function() {
-            if (this.domFirstElement.innerHTML !== this.value) this.domFirstElement.innerHTML = this.value;
+            if (this.htmlFirstElement.innerHTML !== this.value) this.htmlFirstElement.innerHTML = this.value;
         }
     },
     
@@ -195,17 +199,17 @@ createClass({
  *
  * */
 createClass({
-	_name 			: "Container",
-    _package        : "ui.base",
-	_extends		: ["ui.base.Brick"],
+	_name               : "Container",
+    _package            : "ui.base",
+	_extends            : ["ui.base.Brick"],
     
-    domRootChildren : {_type: "Object", _getter: true, _setter: true},
+    htmlHookChildren    : {_type: "Object", _getter: true, _setter: true},
     
-    addUiElement    : {_type: "Method",
+    addUiElement        : {_type: "Method",
         _method: function(_element) {
             if (implements("ui.base.Brick",_element)) {
                 this.addChild(_element);
-                _element.setRoot(this.getDomRootChildren());
+                _element.setHtmlHook(this.getHtmlHookChildren());
             }
         }
     },
@@ -228,9 +232,7 @@ createClass({
 	
     constructor     : {_type: "Method", 
         _method : function(_p) {            
-            
-            this.className = (this.className ? this.className : "uiContainerPane");
-            
+            this.setClassSys("uiContainerPane");
             this.build();
             this.draw();
         }
@@ -238,8 +240,8 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            this.domFirstElement = document.createElement("div");                 
-            this.setDomRootChildren(this.domFirstElement);
+            this.htmlFirstElement = document.createElement("div");                 
+            this.setHtmlHookChildren(this.htmlFirstElement);
         }
     }
 });
@@ -258,9 +260,7 @@ createClass({
     
     constructor     : {_type: "Method", 
         _method: function(_p) {
-            
-            this.className = (this.className ? this.className : "uiContainerPaneH");
-            
+            this.setClassSys("uiContainerPaneH");
             this.build();
             this.draw();
         }
@@ -270,9 +270,8 @@ createClass({
         _method: function() {
             var pane, spacer, i;
             
-            this.domFirstElement = document.createElement("div");            
-            this.domFirstElement.className = this.className;                
-            this.setDomRootChildren(this.domFirstElement);
+            this.htmlFirstElement = document.createElement("div");            
+            this.setHtmlHookChildren(this.htmlFirstElement);
             
             this.panesSettings          = (this.panesSettings ? this.panesSettings : {});
             this.panesSettings.width    = (this.panesSettings.width ? this.panesSettings.width : Math.round(100 / this.nbColumns) + "%");
@@ -283,9 +282,10 @@ createClass({
                 this.children.set(pane,i);
                 this.addUiElement(pane);
             }
+            
             spacer = document.createElement("div");            
             spacer.className = "spacer";
-            this.domFirstElement.appendChild(spacer);
+            this.htmlFirstElement.appendChild(spacer);
         }
     },
     
@@ -310,9 +310,7 @@ createClass({
     
     constructor     : {_type: "Method", 
         _method: function(_p) {;
-            
-            this.className = (this.className ? this.className : "uiContainerPaneV");
-            
+            this.setClassSys("uiContainerPaneV");
             this.build();
             this.draw();
         }
@@ -321,18 +319,20 @@ createClass({
     build           : {_type: "Method", 
         _method: function() {
             var pane, spacer, i;
-            this.domFirstElement = document.createElement("div");            
-            this.domFirstElement.className = "uiContainerPaneV";
-            this.setDomRootChildren(this.domFirstElement);
+            
+            this.htmlFirstElement = document.createElement("div");            
+            this.setHtmlHookChildren(this.htmlFirstElement);
+            
             // Ajoute les différents panes
             for(i = 0; i < this.nbRows; i++) {
                 pane = new ui.container.Pane(this.panesSettings);
                 this.children.set(pane,i);
                 this.addUiElement(pane);
             }
+            
             spacer = document.createElement("div");            
             spacer.className = "spacer";
-            this.domFirstElement.appendChild(spacer);            
+            this.htmlFirstElement.appendChild(spacer);            
         }
     },
     
@@ -358,8 +358,7 @@ createClass({
     
     constructor     : {_type: "Method", 
         _method: function(_p) {
-            this.className = (this.className ? this.className : "uiContainerPaneS");
-            
+            this.setClassSys("uiContainerPaneS");
             this.build();
             this.draw();
         }
@@ -369,8 +368,8 @@ createClass({
         _method: function() {
             var pane, spacer, i, j;
             
-            this.domFirstElement = document.createElement("div");            
-            this.setDomRootChildren(this.domFirstElement);
+            this.htmlFirstElement = document.createElement("div");            
+            this.setHtmlHookChildren(this.htmlFirstElement);
                     
             for(j = 0; j < this.nbColumns; j++) {
                 for(i = 0; i < this.nbColumns; i++) {
@@ -381,7 +380,7 @@ createClass({
             
                 spacer = document.createElement("div");            
                 spacer.className = "spacer";
-                this.domFirstElement.appendChild(spacer);
+                this.htmlFirstElement.appendChild(spacer);
             }
         }
     },
@@ -434,8 +433,8 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function(_p) {
-            this.domFirstElement = document.createElement("div");            
-            this.setDomRootChildren(this.domFirstElement);
+            this.htmlFirstElement = document.createElement("div");            
+            this.setHtmlHookChildren(this.htmlFirstElement);
             this.label = new ui.std.Label(_p);
             this.addUiElement(this.label);
         }
@@ -452,6 +451,7 @@ createClass({
     
     constructor		: {_type: "Method", 
         _method:function(_p) {
+            this.setClassSys("uiStdLabel");
             this.build();
             this.draw();
 		}
@@ -459,8 +459,7 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            this.domFirstElement = document.createElement("div");            
-            this.domFirstElement.className = "uiStdLabel";
+            this.htmlFirstElement = document.createElement("div");            
         }
     }
 });
@@ -475,6 +474,7 @@ createClass({
     
     constructor		: {_type: "Method", 
         _method:function(_p) {
+            this.setClassSys("uiStdImage");
             this.build();
             this.draw();
 		}
@@ -482,8 +482,7 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            this.domFirstElement = document.createElement("img");            
-            this.domFirstElement.className = "uiStdImage";
+            this.htmlFirstElement = document.createElement("img");            
         }
     }
 });

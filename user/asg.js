@@ -9,14 +9,30 @@ createPackage("asg.pawns");
  * 
  * */
 createClass({
-    _name           : "GameUi",
-    _package        : "asg.ui",
+    _name           : "Ui",
+    _package        : "asg",
     _virtual        : true,
     
-    game            : {_type: "asg.board.Game", _getter: true, _setter: true, _autoSet: true},
+    htmlHook        : {_type: "Object", _getter: true},
+    uiElement       : {_type: "ui.Element", _getter: true},
     
-    drawBoard       : {_type: "Method", _method: null},
-    drawMove        : {_type: "Method", _method: null}
+    game            : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true},
+    draw            : {_type: "Method", _method: null}
+}); 
+
+/*
+ * 
+ * */
+createClass({
+    _name           : "Controller",
+    _package        : "asg",
+    _virtual        : true,
+    
+    game            : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true},
+    ui              : {_type: "asg.Ui", _getter: true, _setter: true, _autoSet: true},
+    draw            : {_type: "Method", _method: null}
+    
+    
 }); 
 
 /*
@@ -29,8 +45,10 @@ createClass({
     
     board           : {_type: "asg.board.Board", _getter: true, _setter: true, _autoSet: true},
     referee         : {_type: "asg.actors.Referee", _getter: true, _setter: true, _autoSet: true},
-    players         : {_type: "std.collection.Collect", _getter: true, _setter: true, _autoSet: true}
+    players         : {_type: "std.collection.Collect", _getter: true, _setter: true, _autoSet: true},
     
+    initialize      : {_type: "Method", _method: null},
+    play            : {_type: "Method", _method: null}
 });
 
 /*

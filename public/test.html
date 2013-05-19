@@ -2,36 +2,24 @@
    
 <head>
     <link href="../fw/default/ui.css" rel="stylesheet" type="text/css"/>
-    <link href="../fw/default/ui.css" rel="stylesheet" type="..user/css.css"/>
+    <link href="../user/ticTacToe.css" rel="stylesheet" type="text/css"/>
     <script LANGUAGE="Javascript" SRC="../fw/fw.js"> </script>
     <script LANGUAGE="Javascript" SRC="../fw/lib/std.js"> </script>
     <script LANGUAGE="Javascript" SRC="../fw/lib/ui.js"> </script>
     <script LANGUAGE="Javascript" SRC="../user/asg.js"> </script>
+    <script LANGUAGE="Javascript" SRC="../user/ticTacToe.js"> </script>
 </head>
 
 <body id="body">
 <script LANGUAGE="Javascript">
     
-    var body            = document.getElementById("body");
+    var body        = document.getElementById("body");    
     
-    var board           = new asg.board.SquareBoard({side: 9});
+    var game        = new ticTacToe.Game({side:3});
+    var gameUi      = new ticTacToe.Ui({game: game, htmlHook: body});
+    var gameCtrl    = new ticTacToe.Controller({game: game, ui:gameUi});
     
-    createClass({
-        _name           : "TicTacToUi",
-        _implements     : ["asg.ui.GameUi"],
-         
-        drawBoard       : {_type: "Method", 
-            _method: function() {
-                 
-            }
-        },
-                 
-        drawMove        : {_type: "Method", 
-            _method: function() {
-                 
-            }
-        }
-    });
+    gameCtrl.draw({htmlHook: body});
     
 //    var mainContainer   = new ui.container.PanesV({nbRows : 5});
 //    mainContainer.getPane(0).addUiElement(new ui.std.Text({value:"Baptiste Reveyron",padding:"10px",fontSize: "42px",fontFamily:"sans-serif",color:"#005", borderBottomColor: "#005",borderBottomStyle: "solid",borderBottomWidth: "1px"}));
@@ -43,7 +31,7 @@
 //
 //    mainContainer.getPane(1).addUiElement(headContainer);
 //    mainContainer.getPane(2).addUiElement(new ui.std.Text({className: "essai", value:"D&eacute;veloppeur exp&eacute;riment&eacute; - Chef de projet : Agile & Cr&eacute;atif",padding:"10px", paddingTop: "30px", paddingBottom: "30px",fontFamily:"sans-serif", fontSize:"28px", textAlign: "center"}));
-//    mainContainer.setRoot(body);
+//    mainContainer.setHtmlHook(body);
 //    
 //    var containerS = new ui.container.PanesS({
 //        nbRows:20, 
@@ -66,7 +54,7 @@
 //    });
 //    
 //    mainContainer.getPane(3).addUiElement(containerS);
-//   
+   
 </script>
 </body>
 </html>

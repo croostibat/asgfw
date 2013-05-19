@@ -72,6 +72,14 @@ var isString = function(_object) {
     return (typeof(_object) === "undefined" ? null : (typeof(_object) === "string"));
 };
 
+/* @function isNumber return true if the object is a number 
+ * @param _object(*,mandatory) the object to be tested
+ * @return boolean null if the object is undefined else true, if the object is a number, or false
+ * */
+var isNumber = function(_object) {
+    return (typeof(_object) === "undefined" ? null : (typeof(_object) === "number"));
+};
+
 /* @function clone 
  * @param _object(*, mandatory) 
  * @return {} a copy of the object
