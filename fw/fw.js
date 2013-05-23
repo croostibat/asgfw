@@ -23,6 +23,7 @@ var includeLib = function(_lib) {
         head[0].appendChild(style);
     });
 };
+
 var includePkg = function(_pkg) {
     loadFile("../user/" + _pkg + ".js", function(_content) {
         var head = document.getElementsByTagName("head");
@@ -31,6 +32,7 @@ var includePkg = function(_pkg) {
         head[0].appendChild(style);
     });
 };
+
 var includeCss = function(_css) {
     loadFile("../user/" + _css + ".css", function(_content) {
         var head = document.getElementsByTagName("head");
@@ -190,30 +192,7 @@ var createClass = function(_classDesc) {
 	newClass    = null;    
     /* Work is the object that contains the source code for the generation of the class. */
     work        = {_class : "", _classDesc : null, _const : [], _proto : [], _added : {}, _implements : {}, _errors : []};
-        
-	if (isString(_classDesc._name) === true && isString(_classDesc._package) !== false) {
-        
-        /* Completion of 2 importants attributes of the description
-         * _fullName, the concatanation _package+"."+_name */
-        _classDesc._package             = (_classDesc._package ? _classDesc._package : "");
-        _classDesc._fullName            = (_classDesc._package ? _classDesc._package + "." : "") + _classDesc._name;
-        _classDesc._constructorName     = "constructor_" + _classDesc._package.split(".").join("") + _classDesc._name;
-        work._classDesc                 = _classDesc;
-        /* Verification the type of the elements _implements and extends */
-        if (isArray(_classDesc._implements) === false) {
-            work._errors.push("the attribute _implements is not an []");
-        }
-        if (isArray(_classDesc._extends) === false) {
-            work._errors.push("the attribute _extends is not an []");           
-        }
-        if (isArray(_classDesc._implements) === true && _classDesc._virtual) {
-            /* A virtual class cannot implement any class */
-            work._errors.push("The virtual class " + _classDesc._name + " can't implement any classes.");
-        }
-	}
-    else {
-        work._errors.push("the attribute _name doesn't exist or is not a <string>");
-    }
+    work        = createClass_parseDescription(_classDesc,work);
     
     if (work._errors.length === 0) {
         /* The prototype of the generated classes will contains a system object "_".
@@ -221,6 +200,7 @@ var createClass = function(_classDesc) {
          * 
          * The description of the class is added to the prototype. All the methods and the static attributes
          * will a reference of an element object ._.classDesc */
+        work._classDesc = _classDesc;
         work._proto.push(work._classDesc._fullName + ".prototype._ = {_classDesc : " + jsonize(_classDesc) + "};");
         work = createClass_addClass(_classDesc, "creation", work);
     }
@@ -254,8 +234,8 @@ var createClass_addClass = function(_classDesc, _type, _work) {
         
         _work._added[_classDesc._name]          = _classDesc;
         _work._implements[_classDesc._fullName] = true;
-        
-		/* the attributes & methods of the extended classes are added */
+		
+        /* the attributes & methods of the extended classes are added */
 		createClass_extendsClass(_classDesc, "_extends", _work);
         /* the attributes & methods described in _classDesc are added */
 		createClass_addAttributes(_classDesc, _type, _work);
@@ -329,112 +309,176 @@ var createClass_extendsClass = function(_classDesc, _list,_work) {
  * */
 var createClass_addAttributes = function(_classDesc, _type, _work) {
 
-	var attribute, attributeFinalName, root, definition;
+	var attribute, root, type, setter;
     
 	if (_classDesc) {
-        
+		for (attribute in _classDesc) {
+			/* Ignore the sys attributes (fisrt character is "_") */
+			if (attribute.charAt(0) !== "_") {
+                /* Methods
+                 * */
+                if (_classDesc[attribute]._type === "Method") {
+                      /* Virtual Method 
+                       * */
+                    if (_classDesc[attribute]._method === null) {
+                        if (!(_work._added[attribute] && typeof(_work._added[attribute]._method) === "function") && _type === "implementation") {
+                            _work._errors.push("The virtual method " + _classDesc._name + "." + attribute + " is not implemented.");
+                            _work._implements[_classDesc._fullName] = false;
+                        }
+                    }
+                    /* Implemented method 
+                     * */
+                    if (typeof(_classDesc[attribute]._method) === "function") {
+                        if (_work._added[attribute] && !((_work._added[attribute]._overloadable && _classDesc[attribute]._overload) || attribute === "constructor")) {
+                            _work._errors.push("The method " + _classDesc._name + "." + attribute + " is in collision with " + _work._added[attribute]._classDesc._fullName + "." + attribute);
+                        }
+                        else {
+                            /* Get the description of the class */  
+                            /* If the attribute is the constructor (named "constructor"), it's renamed to _classDesc._constructorName. 
+                             * This name is the concatenation of */
+                            _work._proto.push(_work._classDesc._fullName + ".prototype." + (attribute === "constructor" ? _classDesc._constructorName  : attribute) + " = " + (_type === "creation" ? _work._classDesc._fullName + "" : _classDesc._fullName) +  ".prototype._._classDesc." + attribute + "._method;");
+                            _work._added[attribute]             = _classDesc[attribute];
+                            _work._added[attribute]._classDesc  = _classDesc;
+                        }
+                    }
+                }
+                /* Attributes
+                 * */
+                else {
+                    if (_work._added[attribute]) {
+                        _work._errors.push("The attribute " + attribute + " of " + _classDesc._name + " is in collision with an attribute ancestor.");
+                    }
+                    else {
+                        /* If a value is defined in the description
+                         * */
+                        setter = "set" + attribute.charAt(0).toUpperCase() + attribute.substring(1);
+                        /* The statics attributes are shared by all the instances of a class.
+                         * So this kind of attributes are considered as prototype 
+                         * */        
+                        root = (_classDesc[attribute]._static ? _classDesc._fullName + ".prototype." : root = "this.");
+                        type = (_classDesc[attribute]._static ? "_proto" : "_const");
+
+                        if (typeof(_classDesc[attribute]._value) === "undefined") {
+                            if (_classDesc[attribute]._autoSet === true) {
+                                if ((_classDesc[setter] && _classDesc[setter]._type === "Method") || _classDesc[attribute]._setter === true) {
+                                    _work[type].push(root + attribute + " = null;");
+                                    _work._const.push("this." + setter + "(_p[\"" + attribute + "\"]);");
+                                }
+                                else {
+                                    _work[type].push(root + attribute + " = (implements(\"" + _classDesc[attribute]._type + "\",_p[\"" + attribute + "\"]) ? _p[\"" + attribute + "\"] : null);");
+                                }
+                            }
+                            else {
+                                _work[type].push(root + attribute + " = null;"); 
+                            }
+                        }
+                        else {
+                            _work[type].push(root + attribute + " = " + _classDesc._fullName + ".prototype._._classDesc." + attribute + "._value;");
+                        }
+                        
+                        _work._added[attribute]         = _classDesc[attribute];
+                        _work._added[attribute]._class  = _classDesc;
+                    }
+                }
+            }
+		}
+	}
+	return _work;
+};
+
+/*
+ * 
+ */
+var createClass_getDescriptionByName = function(_className,_work) {
+    try {
+        _className  = eval("(isDefined(" + _className + ") && " + _className + ".prototype ? " + _className + ".prototype._._classDesc" + " : null);");                
+    }
+    catch(e) {
+        _work._errors.push("Retrieving description of " + _className + " error : " + e.description);
+        return null;
+    }
+};
+
+/* @function createClass_parseDescription
+ * @param _classDesc({} string,mandatory) the description of the class. @see (@objecture _classDesc) It contains the attributes and the methods that must be added to new class
+ * @param _work({}; mandatory) the object is generated by createClass @see (@function createClass)
+ * */
+var createClass_parseDescription = function(_classDesc, _work) {
+
+	var attribute, attributeUpperCaseFirstLetter, root, type, setter, getter;
+    
+    if (isString(_classDesc._name) !== true) {
+        _work._errors.push("the attribute _name doesn't exist or is not a <string>");
+	}
+    if (isString(_classDesc._package) === false) {
+        _work._errors.push("the attribute _package is not a <string>");
+    }
+    if (isArray(_classDesc._implements) === false) {
+        _work._errors.push("the attribute _implements is not an []");
+    }
+    if (isArray(_classDesc._extends) === false) {
+        _work._errors.push("the attribute _extends is not an []");           
+    }
+    if (isArray(_classDesc._implements) === true && _classDesc._virtual) {
+        /* A virtual class cannot implement any class */
+        _work._errors.push("The virtual class " + _classDesc._name + " can't implement any classes.");
+    }
+   
+    _classDesc._package             = (_classDesc._package ? _classDesc._package : "");
+    _classDesc._fullName            = (_classDesc._package ? _classDesc._package + "." : "") + _classDesc._name;
+    _classDesc._constructorName     = "constructor_" + _classDesc._package.split(".").join("") + _classDesc._name;
+   
+	if (_classDesc) {
 		for (attribute in _classDesc) {
 			/* Ignore the sys attributes (fisrt character is "_") */
 			if (attribute.charAt(0) !== "_") {
                 
-                /* Attribute */
                 if (typeof(_classDesc[attribute]._type) === "string") {
-                    
+                    /* Methods
+                     * */
                     if (_classDesc[attribute]._type === "Method") {
-                          /* Virtual Method */
+                          /* Virtual Method 
+                           * */
                         if (_classDesc[attribute]._method === null) {
-                            if (_classDesc._virtual) {
-                                if (!(_work._added[attribute] && typeof(_work._added[attribute]._method) === "function") && _type === "implementation") {
-                                    _work._errors.push("The virtual method " + _classDesc._name + "."+ attribute + " is not implemented.");
-                                    _work._implements[_classDesc._fullName] = false;
-                                }
-                            }
-                            else {
-                                _work._errors.push("The non-vritual class " + _classDesc._name + "."+ attribute + " can't own virtual method.");
+                            if (!_classDesc._virtual) {
+                                _work._errors.push("The non-vritual class " + _classDesc._name + "." + attribute + " can't own virtual method.");
                             }
                         }
-                        /* Implemented method */
+                        /* Implemented method 
+                         * */
                         else if (typeof(_classDesc[attribute]._method) === "function") {
                             if (_classDesc._virtual) {
-                                _work._errors.push(_classDesc._name + "."+ attribute + " : " + "a virtual class can't own implemented method");
-                            }
-                            else {
-                                if (_work._added[attribute] && !((_work._added[attribute]._overloadable && _classDesc[attribute]._overload) || attribute === "constructor")) {
-                                    _work._errors.push("The method " + _classDesc._name + "." + attribute + " is in collision with " + _work._added[attribute]._classDesc._fullName + "." + attribute);
-                                }
-                                else {
-                                    /* Get the description of the class */  
-                                    attributeFinalName = (attribute === "constructor" ? _classDesc._constructorName  : attribute);;
-                                    /* If the attribute is the constructor (named "constructor"), it's renamed to _classDesc._constructorName. 
-                                     * This name is the concatenation of */
-                                    _work._proto.push(_work._classDesc._fullName + ".prototype." + attributeFinalName + " = " + (_type === "creation" ? _work._classDesc._fullName + "" : _classDesc._fullName) +  ".prototype._._classDesc." + attribute + "._method;");
-                                    _work._added[attribute]             = _classDesc[attribute];
-                                    _work._added[attribute]._classDesc  = _classDesc;
-                                }
+                                _work._errors.push(_classDesc._name + "."+ attribute + " : a virtual class can't own implemented method");
                             }
                         }
                         else {
                             _work._errors.push("The method " + _classDesc._name + "." + attribute + " is not null or a Function");
                         }
                     }
-                    
+                    /* Attributes
+                     * */
                     else {
-                        if (_work._added[attribute]) {
-                            _work._errors.push("The attribute " + attribute + " of " + _classDesc._name + " is in collision with an attribute ancestor.");
+                        attributeUpperCaseFirstLetter  = attribute.charAt(0).toUpperCase() + attribute.substring(1);
+                        setter  = "set" + attributeUpperCaseFirstLetter;
+                        getter  = "get" + attributeUpperCaseFirstLetter;
+                        root    = (_classDesc[attribute]._static ? _classDesc._fullName + ".prototype." : root = "this.");
+
+                        /* Add the setter method if asked */
+                        if (_classDesc[attribute]._setter && !(_classDesc[setter] && _classDesc[setter]._type === "Method")) {
+                            _classDesc[setter] = {_type :"Method"};
+                            eval("_classDesc[setter]._method = function(_object) {" + (_classDesc[attribute]._type === "*" ? root + attribute + " = _object; return true;" : "if (implements(\"" + _classDesc[attribute]._type + "\",_object)) {" + root + attribute + " = _object; return true;} return false;") + "};");
                         }
-                        else {
-                            /* If a value is defined in the description 
-                             */
-
-                            /* The statics attributes are shared by all the instances of a class.
-                             * So this kind of attributes are considered as prototype */        
-                            switch(typeof(_classDesc[attribute]._value)) {
-                                case "function" : 
-                                    definition = attribute + " = " + _classDesc._fullName + ".prototype._._classDesc." + attribute + "._value();";
-                                    break;
-                                case "undefined":
-                                    if (_classDesc[attribute]._autoSet === true) {
-                                        definition = attribute + " = (implements(\"" + _classDesc[attribute]._type + "\",_p[\"" + attribute + "\"]) ? _p[\"" + attribute + "\"] : null);";
-                                    }
-                                    else {
-                                        definition = attribute + " = null;"; 
-                                    }
-                                    break;
-                                default:
-                                    definition = attribute + " = " + _classDesc._fullName + ".prototype._._classDesc." + attribute + "._value;";
-                                    break;
-                            }
-
-                            if (_classDesc[attribute]._static) {
-                                root = _work._classDesc._fullName + ".prototype.";
-                                _work._proto.push(root + definition);
-                            }
-                            else {
-                                root = "this.";
-                                _work._const.push(root + definition);
-                            }
-
-                            attributeFinalName = attribute.charAt(0).toUpperCase() + attribute.substring(1);
-                            /* Add the setter method if asked */
-                            if (_classDesc[attribute]._setter) {
-                                _work._proto.push(_work._classDesc._fullName + ".prototype.set" + attributeFinalName + " = function(_object) {" + (_classDesc[attribute]._type === "*" ? root + attribute + " = _object; return true;" : "if (implements(\"" + _classDesc[attribute]._type + "\",_object)) {" + root + attribute + " = _object; return true;} return false;") + "};");
-                                _work._added["set" + attributeFinalName]          = "method";
-                                _work._added["set" + attributeFinalName]._class   = _classDesc;
-                            }
-                            /* Add the getter method if asked */
-                            if (_classDesc[attribute]._getter) {
-                                _work._proto.push(_work._classDesc._fullName + ".prototype.get" + attributeFinalName + " = function() { return " + root + attribute + ";};");
-                                _work._added["get" + attributeFinalName]          = "method";
-                                _work._added["get" + attributeFinalName]._class   = _classDesc;
-                            }
-                            _work._added[attribute]         = _classDesc[attribute];
-                            _work._added[attribute]._class  = _classDesc;
+                        /* Add the getter method if asked */
+                        if (_classDesc[attribute]._getter && !(_classDesc[getter] && _classDesc[getter]._type === "Method")) {
+                            _classDesc[getter] = {_type :"Method"};
+                             eval("_classDesc[getter]._method = function() { return " + root + attribute + ";};");
                         }
                     }
                 }
             }
 		}
 	}
+    
 	return _work;
 };
 

@@ -12,13 +12,17 @@ createClass({
         _method: function(_p) {
             _p = _p ? _p : {};
             if (isNumber(_p.side)) {
-                this.uiElement = new ui.container.PanesS({class: "board", nbRows:_p.side, nbColumns:_p.side, panesSettings:{class: "slot"}});
+                
+                var slotsSettings = {
+                    class       : "slot",
+                    onClick     : this.onSlotClick
+                };
+                
+                this.uiElement = new ui.container.PanesS({class: "board", nbRows:_p.side, nbColumns:_p.side, panesSettings: slotsSettings});
                 this.uiElement.setHtmlHook(_p.htmlHook);
             }
         }
     }
-
-
 });
 
 /*
@@ -34,13 +38,31 @@ createClass({
 
         }
     },
-
+    
     draw            : {_type: "Method",
         _method: function(_p) {
             _p = _p ? _p : {};
             if (implements("ticTacToe.Game",this.game) && implements("ticTacToe.Ui",this.ui)) {
                 this.ui.draw({side: this.game.board.getSide(), htmlHook: _p.htmlHook});
             }
+        }
+    },
+    
+    onSlotClick     : {_type: "Method", 
+        _method: function(_p) {
+            alert("ok");
+        }
+    },
+    
+    onShowMove      : {_type: "Method", 
+        _method: function(_p) {
+            
+        }
+    },
+            
+    onShowBoard     : {_type: "Method",
+        _method: function(_p) {
+            
         }
     }
 });

@@ -1,5 +1,4 @@
 createPackage("asg");
-createPackage("asg.ui");
 createPackage("asg.board");
 createPackage("asg.actors");
 createPackage("asg.actions");
@@ -12,6 +11,8 @@ createClass({
     _name           : "Ui",
     _package        : "asg",
     _virtual        : true,
+    
+    onSlotClick     : {_type: "ui.Event", _getter: true, _setter: true, _autoSet: true},
     
     htmlHook        : {_type: "Object", _getter: true},
     uiElement       : {_type: "ui.Element", _getter: true},
@@ -43,10 +44,13 @@ createClass({
     _package        : "asg",
     _virtual        : true,
     
+    onShowBoard     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onShowMove      : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    
     board           : {_type: "asg.board.Board", _getter: true, _setter: true, _autoSet: true},
     referee         : {_type: "asg.actors.Referee", _getter: true, _setter: true, _autoSet: true},
-    players         : {_type: "std.collection.Collect", _getter: true, _setter: true, _autoSet: true},
-    
+    players         : {_type: "std.collection.Collection", _getter: true, _setter: true, _autoSet: true},
+    moves           : {_type: "std.collection.Collection", _getter: true, _setter: true, _autoSet: true},
     initialize      : {_type: "Method", _method: null},
     play            : {_type: "Method", _method: null}
 });
@@ -179,7 +183,7 @@ createClass({
  * 
  * */
 createClass({
-    _name			: "Turn",    
+    _name			: "Move",    
     _package        : "asg.actions",
     actions         : {_type: "std.collection.Collection", _getter: true, _setter: true}
     
