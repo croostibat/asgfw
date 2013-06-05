@@ -1,18 +1,18 @@
 createPackage("std");
 createPackage("std.chainer");
-createPackage("std.collection");
+createPackage("std.coll");
 createPackage("std.proc");
 createPackage("std.misc");
 
 /*
  * 
- */
+ * */
 createClass({
 	
 	_name		: "Node",
     _package    : "std.chainer",
     
-    children    : {_type: "std.collection.Collection", _getter: true},
+    children    : {_type: "std.coll.Collection", _getter: true},
 	parent		: {_type: "Object", _getter: true, _setter: true},
 	
     addChild	: {_type: "Method", 
@@ -24,21 +24,20 @@ createClass({
     
     constructor		: {_type: "Method", 
         _method: function(_p) {
-    		this.children = new std.collection.MapArray({type:"std.Node"});
+    		this.children = new std.coll.MapArray({type:"std.Node"});
     	}
     }
 });
-/*****************************************************************************/
 
 /*****************************************************************************/
 /* STACKS                                                           
 /*****************************************************************************/
 /*
  * 
- */
+ * */
 createClass({
     _name       : "Stack",
-    _package    : "std.collection",
+    _package    : "std.coll",
     _virtual    : true,
     
     head        : {_type: "Method", _method: null},
@@ -46,17 +45,16 @@ createClass({
     push        : {_type: "Method", _method: null},
     pop         : {_type: "Method", _method: null}
 });
-/*****************************************************************************/
 
 /*****************************************************************************/
 /* COLLECTIONS															
 /*****************************************************************************/
 /*
  *
- */
+ * */
 createClass({
     _name           : "Collection",
-    _package        : "std.collection",
+    _package        : "std.coll",
     _virtual        : true,
     foreach         : {_type: "Method", _method: null},
     isSet           : {_type: "Method", _method: null},
@@ -67,12 +65,12 @@ createClass({
 
 /*
  * 
- */
+ * */
 createClass({
 	
 	_name           : "MapArray",
-    _package        : "std.collection",
-    _implements     : ["std.collection.Collection"],
+    _package        : "std.coll",
+    _implements     : ["std.coll.Collection"],
     
     length          : {_type: "Number", _getter: true},    
     objects         : {_type: "Object", _getter: true},
@@ -162,42 +160,41 @@ createClass({
 /* FUNCTION 
 /*****************************************************************************/
 /*
- * Constructor
- * fn (Function) :
- */
+ * 
+ * */
 createClass({
 	
-	_name       : "Callback",
-    _package    : "std.proc",
+	_name           : "Callback",
+    _package        : "std.proc",
     
-	fn          : {_type: "Function", _getter: true, _setter: true, _autoSet: true},
-    aa          : {_type: "*"},
-	params      : {_type: "*", _getter: true, _setter: true, _autoSet: true},
-	
-    addParam    : {_type: "Method", 
+	fn              : {_type: "Function", _getter: true, _setter: true, _autoSet: true},
+	context         : {_type: "*", _getter: true, _setter: true, _autoSet: true},
+    
+    addToContext    : {_type: "Method", 
         _method: function(_name, _value) {
-            if (instanceOf(this.params) === "object") {
-                if (!this.params) {
-                    this.params = {};
-                }
-                
-                if (!this.params[_name]) {
-                    this.params[_name] = _value;
-                    return true;
-                }                
+            if (!this.context) {
+                this.context = {};
             }
+            
+            if (!this.context[_name]) {
+                this.context[_name] = _value;
+                return true;
+            }                
+            
             return false;
 		}
     },
+            
     constructor : {_type: "Method", 
         _method : function(_p) {
             
         }
     },
+            
 	exec		: {_type: "Method", 
         _method: function(_params) {
 			if (instanceOf(this.fn) === "function") {
-				this.fn(this.params, _params);
+				this.fn(_params);
 			}
 		}
 	}
@@ -205,7 +202,7 @@ createClass({
 
 /* Fonction synchrone / asynchrone encapsul�es 
  * 
- */
+ * */
 createClass({
 	_name			: "Job",
 	_package        : "std.proc",
@@ -243,20 +240,17 @@ createClass({
          }
     }
 });
-/*****************************************************************************/
 
-
-/*****************************************************************************/
 /* @class Event
  * 
- */
+ * */
 createClass({
 	_name               : "Event",
     _package            : "std.proc",
     /* @attributes
      * _p.callback (Procedure)  : the procedure to be set as the callback */
     callback            : {_type: "std.proc.Callback", _getter: true, _setter: true, _autoSet: true, _autoInstance: true},
-    
+    context             : {_type: "*", _getter: true, _setter: true, _autoSet: true},
     /* @method constructor(_p)
      * _p.fn (Function, mandatory) : the main function to be called when the event will be triggered 
      * _p.params(*,optional): this object will be passed to the main function when the event will be triggered
@@ -270,26 +264,25 @@ createClass({
     /* @method UiEvent.getTrigger()
      * Return a standalone function which trigger the UiEvent. */
     getTrigger          : {_type: "Method", 
-        _method: function() {
-            var _this = this;
-            return function(){ _this.callback.exec();};
+        _method: function(_p) {
+            var _this   = this;
+            return function(){ _this.callback.exec(_p);};
 		}
     },
             
 	trigger             : {_type: "Method", 
         _method: function(_p) {
-            this.callback.exec();
+            this.callback.exec(_p);
 		}
 	}
 });
-/*****************************************************************************/
 
 /*****************************************************************************/
 /* MISC
 /*****************************************************************************/
 /*
  * 
- */
+ * */
 createClass({
 	
 	_name           : "Id",
@@ -315,5 +308,3 @@ createClass({
 		}
 	}	
 });
-/*****************************************************************************/
-

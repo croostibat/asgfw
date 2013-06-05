@@ -3,28 +3,7 @@ createPackage("ui.base");
 createPackage("ui.container");
 createPackage("ui.std");
 
-/* @class ui.Event
- * 
- * */
-createClass({
-	_name               : "Event",
-    _package            : "ui",
-    _extends            : ["std.proc.Event"],
-
-    /* @attributes 
-     */
-    uiBrick             : {_type: "ui.base.Brick", _getter: true, _autoSet: true},
-    
-    /* @method UiEvent.constructor(_p)
-     * _p.callbackFn (Function) : the main function to be called when the event will be triggered */
-    constructor         : {_type: "Method", 
-        _method         : function(_p) {
-            this.callback.addParam("uiEvent",this);
-        }
-    } 
-});
-
-/*
+/* @class ui.base.Stylable
  * 
  * */
 createClass({
@@ -65,7 +44,7 @@ createClass({
     applyStyles         : {_type: "Method", _method: null}
 });
 
-/*
+/* @class ui.base.Eventable
  * 
  * */
 createClass({
@@ -73,13 +52,11 @@ createClass({
     _package            : "ui.base",
     _virtual            : true,
        
-	onActivate			: {_type: "ui.Event", _getter: true, _autoSet: true},
-	onClick             : {_type: "ui.Event", _getter: true, _autoSet: true},   
-                   
+	onClick             : {_type: "std.proc.Event", _getter: true, _autoSet: true},   
+    
     applyEvents         : {_type: "Method", _method: null}
 });
 
-/*****************************************************************************/
 /* @class ui.base.Brick
  * 
  * */
@@ -92,33 +69,38 @@ createClass({
     help                : {_type: "String", _getter: true, _autoSet: true},
     
     htmlHook            : {_type: "Object", _getter: true},
-    htmlFirstElement     : {_type: "Object"},
+    htmlFirstElement    : {_type: "Object"},
     
+    /* @method constructor 
+     * @param _p ({}, mandatory)
+     * @param _p.help 
+     * */    
     constructor         : {_type: "Method", 
         _method: function(_p) {
-            this.children       = new std.collection.MapArray();
-            this.htmlHook        = _p.htmlHook;
+            this.children       = new std.coll.MapArray();
+            this.htmlHook       = _p.htmlHook;
             this.id             = new std.misc.Id();
             
-            if (isFunction(_p.onActivate)) {
-                this.onActivate = new ui.Event({fn:_p.onActivate, uiBrick: this});
-            }
             if (isFunction(_p.onClick)) {
-                this.onClick = new ui.Event({fn:_p.onClick, uiBrick: this});
+                this.onClick = new std.proc.Event({fn:_p.onClick});
             }
         }
     },
     
-    /* @method UiHTML.setHtmlHook
-     * @params
+    /* @method UiHTML.setHtmlHook 
+     * @params _htmlHook ({}, mandatory) The html element which will contains 
      */
     setHtmlHook     : {_type: "Method", 
         _method: function(_htmlHook) {
-            this.htmlHook = _htmlHook;
-            this.htmlHook.appendChild(this.htmlFirstElement);            
+            if (_htmlHook && typeof(_htmlHook.appendChild) == "function") {
+                this.htmlHook = _htmlHook;
+                this.htmlHook.appendChild(this.htmlFirstElement);                            
+            }
         }
     },
-            
+           
+    /* @method applyStyles Compare and apply if necessary the styles defined (in the attributes) to the styles applied (to the html elements).
+     * */
     applyStyles     : {_type: "Method", _overloadable   : true,
         _method  : function() {
             if (this.htmlFirstElement) {
@@ -147,10 +129,9 @@ createClass({
                 if (this.backgroundColor !== null && this.htmlFirstElement.style.backgroundColor !== this.backgroundColor) this.htmlFirstElement.style.backgroundColor = this.backgroundColor;
                 if (this.borderColor !== null && this.htmlFirstElement.style.borderColor !== this.borderColor) this.htmlFirstElement.style.borderColor = this.borderColor;
                 if (this.color !== null && this.htmlFirstElement.style.color !== this.color) this.htmlFirstElement.style.color = this.color;
-
+                
                 if (this.htmlFirstElement.style.fontFamily !== this.fontFamily) this.htmlFirstElement.style.fontFamily = this.fontFamily;
                 if (this.htmlFirstElement.style.fontSize !== this.fontSize) this.htmlFirstElement.style.fontSize = this.fontSize;
-
                 if (this.htmlFirstElement.style.textAlign !== this.textAlign) this.htmlFirstElement.style.textAlign = this.textAlign;
 
             }
@@ -159,18 +140,19 @@ createClass({
             
     applyEvents       : {_type: "Method", _overloadable   : true,
         _method     : function() {
+            
             if (this.onActivate) {
-                this.htmlFirstElement.onclick     = this.onActivate.getTrigger();
+                this.htmlFirstElement.onclick     = this.onActivate.getTrigger(this);
             }
             if (this.onClick) {
-                this.htmlFirstElement.onclick     = this.onClick.getTrigger();
+                this.htmlFirstElement.onclick     = this.onClick.getTrigger(this);
             }
         }
     }
 });
 
 
-/*
+/* @class ui.base.Element
  * 
  * */
 createClass({
@@ -195,7 +177,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.base.Container
  *
  * */
 createClass({
@@ -204,6 +186,7 @@ createClass({
 	_extends            : ["ui.base.Brick"],
     
     htmlHookChildren    : {_type: "Object", _getter: true, _setter: true},
+    coordinate          : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
     addUiElement        : {_type: "Method",
         _method: function(_element) {
@@ -222,7 +205,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.container.Pane
  * 
  * */
 createClass({
@@ -246,7 +229,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.container.PanesH
  * 
  * */
 createClass({
@@ -277,8 +260,9 @@ createClass({
             this.panesSettings.width    = (this.panesSettings.width ? this.panesSettings.width : Math.round(100 / this.nbColumns) + "%");
             
             // Ajoute les différents panes
-            for(i = 0; i < this.nbColumns; i++) {                
+            for(i = 0; i < this.nbColumns; i++) {    
                 pane = new ui.container.Pane(this.panesSettings);
+                pane.setCoordinate(i + "," + "0");
                 this.children.set(pane,i);
                 this.addUiElement(pane);
             }
@@ -296,7 +280,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.container.PanesV
  * 
  * */
 createClass({
@@ -326,6 +310,7 @@ createClass({
             // Ajoute les différents panes
             for(i = 0; i < this.nbRows; i++) {
                 pane = new ui.container.Pane(this.panesSettings);
+                pane.setCoordinate("0" + "," + i);
                 this.children.set(pane,i);
                 this.addUiElement(pane);
             }
@@ -343,7 +328,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.container.PanesS
  * 
  * */
 createClass({
@@ -372,8 +357,9 @@ createClass({
             this.setHtmlHookChildren(this.htmlFirstElement);
                     
             for(j = 0; j < this.nbColumns; j++) {
-                for(i = 0; i < this.nbColumns; i++) {
+                for(i = 0; i < this.nbRows; i++) {
                     pane = new ui.container.Pane(this.panesSettings);
+                    pane.setCoordinate(i + "," + j);
                     this.children.set(pane, i + ":" + j);
                     this.addUiElement(pane);
                 }
@@ -414,7 +400,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.std.Button
  * 
  * */
 createClass({
@@ -441,7 +427,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.std.Text
  * 
  * */
 createClass({
@@ -464,7 +450,7 @@ createClass({
     }
 });
 
-/*
+/* @class ui.std.Image
  * 
  * */
 createClass({

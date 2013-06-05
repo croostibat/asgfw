@@ -12,14 +12,42 @@ createClass({
     _package        : "asg",
     _virtual        : true,
     
-    onSlotClick     : {_type: "ui.Event", _getter: true, _setter: true, _autoSet: true},
+    onSlotClick     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     
     htmlHook        : {_type: "Object", _getter: true},
     uiElement       : {_type: "ui.Element", _getter: true},
-    
-    game            : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true},
+
     draw            : {_type: "Method", _method: null}
-}); 
+});
+
+/*
+ * 
+ * */
+createClass({
+    _name               : "Game",
+    _package            : "asg",
+    _virtual            : true,
+    
+    started             : {_type: "Boolean", _getter: true, _setter: true},
+    playerTurn          : {_type: "asg.actors.Player", _getter: true, _setter: true},
+
+    onPlay              : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onPickPlayer        : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    
+    board               : {_type: "asg.board.Board", _getter: true, _setter: true, _autoSet: true},
+    players             : {_type: "std.coll.Collection", _getter: true, _setter: true, _autoSet: true},
+    moves               : {_type: "std.coll.Collection", _getter: true, _setter: true, _autoSet: true},
+    
+    initialize          : {_type: "Method", _method: null},
+    
+    play                : {_type: "Method", _method: null},
+    pickPlayer          : {_type: "Method", _method: null},
+    
+    start               : {_type: "Method", _method: null},
+    stop                : {_type: "Method", _method: null},
+    
+    setPlayer           : {_type: "Method", _method: null}
+});
 
 /*
  * 
@@ -31,28 +59,8 @@ createClass({
     
     game            : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true},
     ui              : {_type: "asg.Ui", _getter: true, _setter: true, _autoSet: true},
-    draw            : {_type: "Method", _method: null}
-    
-    
-}); 
 
-/*
- * 
- * */
-createClass({
-    _name           : "Game",
-    _package        : "asg",
-    _virtual        : true,
-    
-    onShowBoard     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    onShowMove      : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    
-    board           : {_type: "asg.board.Board", _getter: true, _setter: true, _autoSet: true},
-    referee         : {_type: "asg.actors.Referee", _getter: true, _setter: true, _autoSet: true},
-    players         : {_type: "std.collection.Collection", _getter: true, _setter: true, _autoSet: true},
-    moves           : {_type: "std.collection.Collection", _getter: true, _setter: true, _autoSet: true},
-    initialize      : {_type: "Method", _method: null},
-    play            : {_type: "Method", _method: null}
+    draw            : {_type: "Method", _method: null} 
 });
 
 /*
@@ -62,7 +70,7 @@ createClass({
 	_name           : "Board",
 	_package        : "asg.board",
     
-	slots           : {_type: "std.collection.Collection", _getter: true},
+	slots           : {_type: "std.coll.Collection", _getter: true},
     
     /*
      * 
@@ -80,9 +88,22 @@ createClass({
      * */
 	constructor 	: {
         _type: "Method", _method: function(_p) {
-            this.slots  =  new std.collection.MapArray();
+            this.slots  =  new std.coll.MapArray();
         }
 	}
+});
+
+/*
+ * 
+ * */
+createClass({
+	_name           : "Slot",
+	_package        : "asg.board",
+    
+	id              : {_type: "String", _getter:true, _setter: true},
+	name            : {_type: "String", _getter:true, _setter: true},
+	board           : {_type: "asg.board.Board", _getter:true, _setter: true},
+	occupants       : {_type: "std.coll.Collection", _getter:true, _setter: true}
 });
 
 /*
@@ -116,20 +137,6 @@ createClass({
  * 
  * */
 createClass({
-	_name           : "Slot",
-	_package        : "asg.board",
-    
-	id              : {_type: "String", _getter:true, _setter: true},
-	name            : {_type: "String", _getter:true, _setter: true},
-	board           : {_type: "asg.board.Board", _getter:true, _setter: true},
-	occupants       : {_type: "std.collection.Collection", _getter:true, _setter: true}
-	
-});
-
-/*
- * 
- * */
-createClass({
 	_name           : "Pawn",
 	_package        : "asg.pawns",
     
@@ -144,39 +151,34 @@ createClass({
  * 
  * */
 createClass({
-  
 	_name           : "Pool",
     _package        : "asg.pawns",
     id              : {_type: "std.misc.Id", _getter: true},
 	name            : {_type: "String", _getter: true, _setter: true},
-	pawns           : {_type: "std.collection.Collection", _getter: true, _setter: true},
+	pawns           : {_type: "std.coll.Collection", _getter: true, _setter: true},
     
     constructor     : {
         _type: "Method", _method : function(_p) {
             this.id = new std.misc.Id();
         }
     }
-  
 });
 
 /*
  * 
  * */
 createClass({
-
-    _name           : "Referee",
-    _package        : "asg.actors"
-    
-});
-
-/*
- * 
- * */
-createClass({
-
     _name           : "Player",
-    _package        : "asg.actors"
+    _package        : "asg.actors",
+    _virtual        : true,
     
+    id              : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    name            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    
+    board           : {_type: "asg.board.Board", _getter:true, _setter: true},
+    
+    turn            : {_type: "Method", _method: null},
+    play            : {_type: "Method", _method: null}
 });
 
 /*
@@ -185,15 +187,13 @@ createClass({
 createClass({
     _name			: "Move",    
     _package        : "asg.actions",
-    actions         : {_type: "std.collection.Collection", _getter: true, _setter: true}
-    
+    actions         : {_type: "std.coll.Collection", _getter: true, _setter: true}
 });
 
 /*
  * 
  * */
 createClass({
-    
     _name			: "Action",
     _package        : "asg.actions", 
     type            : {_type: "Object", _static: true, _value: {move:"Move",set:"Set"}}
