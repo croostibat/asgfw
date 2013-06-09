@@ -350,7 +350,7 @@ var createClass_addProperties = function(_classDesc, _type, _work) {
                             if (_classDesc[property]._autoSet === true) {
                                 if ((_classDesc[setter] && _classDesc[setter]._type === "Method") || _classDesc[property]._setter === true) {
                                     _work[type].push(root + property + " = null;");
-                                    _work._const.push("this." + setter + "(_p[\"" + property + "\"]);");
+                                    _work._const.push("if (isDefined(_p[\"" + property + "\"])){ this." + setter + "(_p[\"" + property + "\"]);};");
                                 }
                                 else {
                                     _work[type].push(root + property + " = (implements(\"" + _classDesc[property]._type + "\",_p[\"" + property + "\"]) ? _p[\"" + property + "\"] : null);");

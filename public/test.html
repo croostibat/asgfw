@@ -16,8 +16,9 @@
     
     var game        = new ticTacToe.Game({side:5});
     
-    game.setPlayer("blanc", new ticTacToe.PlayerUi({name:"Blanc", id: "B"}));
-    game.setPlayer("noir", new ticTacToe.PlayerUi({name:"Noir", id: "N"}));
+    game.setReferee(new ticTacToe.Referee());
+    game.setPlayer(new ticTacToe.PlayerUi({name:"Blanc", id: "B"}));
+    game.setPlayer(new ticTacToe.PlayerUi({name:"Noir", id: "N"}));
     
     var gameUi      = new ticTacToe.Ui({game: game, htmlHook: body});
     var gameCtrl    = new ticTacToe.Controller({game: game, ui:gameUi});
