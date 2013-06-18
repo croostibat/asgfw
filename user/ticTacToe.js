@@ -11,12 +11,12 @@ createClass({
     draw       : {_type: "Method",
         _method: function(_p) {
             _p = _p ? _p : {};
-            if (isNumber(_p.side)) {
+            if (isNumber(_p.nbRows) && isNumber(_p.nbColumns)) {
                 var slotsSettings = {
                     class       : "slot",
                     onClick     : this.onSlotClick
                 };
-                this.uiElement = new ui.container.PanesS({class: "board", nbRows:_p.side, nbColumns:_p.side, panesSettings: slotsSettings});
+                this.uiElement = new ui.container.PanesS({class: "board", nbRows:_p.nbRows, nbColumns:_p.nbColumns, panesSettings: slotsSettings});
                 this.uiElement.setHtmlHook(_p.htmlHook);
             }
         }
@@ -28,60 +28,16 @@ createClass({
  * */
 createClass({
     _name               : "Game",
-    _implements         : ["asg.Game"],
+    _implements         : ["asgMin.Game"],
     _package            : "ticTacToe",
     
     /*
-     *
-     * */
-    initialize          : {_type: "Method", 
-        _method: function() {
-            
-        }
-    },
-    
-    /*
      * 
      * */
-    setPlayer           : {_type: "Method",
-        _method : function(_player){
-            if (implements("asg.actors.Player", _player)) {
-                _player.setGame(this);
-                this.players.set(_player, _player.id);
-            }
-        }
-    },
-      
-    /*
-     * 
-     * */
-    setReferee          : {_type: "Method", _overload: true,
-        _method: function(_referee) {
-            this.referee = _referee;
-            this.referee.setGame(this);
-        }
-    },
-     
-    /*
-     * 
-     * */            
-    start               : {_type: "Method", 
-        _method: function(_p) {
-            if (!this.getStarted()) {
-                this.setStarted(true);
-                this.referee.pickPlayer();
-            }
-        }
-    },
-         
-    /*
-     * 
-     * */            
-    stop                : {_type: "Method", 
-        _method: function(_p) {
-             if (this.getStarted()) {
-                 this.setStarted(false);
-             }
+    addMove             : {_type: "Method",
+        _method: function(_move) {
+            this.setCurrentMove(_move);
+            this.setFirstMove(_move);
         }
     },
     
@@ -90,7 +46,7 @@ createClass({
      * */
     constructor         : {_type: "Method",
         _method: function(_p) {
-            this.board      = new ticTacToe.Board({side:_p.side});
+            this.board      = new ticTacToe.Board({nbColumns: _p.nbColumns, nbRows: _p.nbRows});
             this.players    = new std.coll.MapArray();
         }
     }
@@ -101,17 +57,8 @@ createClass({
  * */
  createClass({
     _name               : "Controller",
-    _implements         : ["asg.Controller"],
+    _implements         : ["asgMin.Controller"],
     _package            : "ticTacToe",
-    
-    /*
-     * 
-     * */
-    constructor         : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    },
     
     /*
      * 
@@ -120,30 +67,8 @@ createClass({
         _method: function(_p) {
             _p = _p ? _p : {};
             if (implements("ticTacToe.Game",this.game) && implements("ticTacToe.Ui",this.ui)) {
-                this.ui.draw({side: this.game.board.getSide(), htmlHook: _p.htmlHook});
+                this.ui.draw({nbRows: this.game.board.getNbRows(), nbColumns: this.game.board.getNbColumns(), htmlHook: _p.htmlHook});
             }
-        }
-    },
-    
-    /*
-     * 
-     * */    
-    setUi               : {_type: "Method", _overload: true,
-        _method: function(_ui) {
-            this.ui = _ui;            
-            this.ui.setOnSlotClick(new std.proc.Event({context:this, fn:this.onSlotClickFn}));
-        }
-    },
-    
-    /*
-     * 
-     * */
-    setGame             : {_type: "Method", _overload: true,
-        _method: function(_game) {
-            this.game = _game;
-            this.game.setOnPlay(new std.proc.Event({context:this, fn:this.onPlayFn}));
-            this.game.setOnPickPlayer(new std.proc.Event({context:this, fn:this.onPickPlayerFn}));
-            this.game.setOnTurnOver(new std.proc.Event({context:this, fn:null}));            
         }
     },
     
@@ -153,10 +78,12 @@ createClass({
     onSlotClickFn   : {_type: "Method",
         _method: function(_uiSlot) {
             var coordinate, playerTurn;
+            
             coordinate  = _uiSlot.getCoordinate().split(",");
             playerTurn  = this.context.game.referee.getPlayerTurn();
+            
             if (implements("ticTacToe.PlayerUi", playerTurn)) {
-                playerTurn.play({x: coordinate[0],y: coordinate[1]});
+                playerTurn.play({column: parseInt(coordinate[0]),row: parseInt(coordinate[1])});
             }
         }
     },
@@ -168,7 +95,7 @@ createClass({
         _method: function(_p) {
             
             var boardUi    = this.context.ui.getUiElement();
-            var slotUi     = boardUi.getPane(_p.x, _p.y);
+            var slotUi     = boardUi.getPane(_p.column, _p.row);
             
             if (_p.player.getId() === "N") {
                 slotUi.setClass("slot slot_black");
@@ -176,7 +103,6 @@ createClass({
             else {
                 slotUi.setClass("slot slot_white");
             }
-            
             slotUi.applyStyles();
         }
     },
@@ -191,7 +117,6 @@ createClass({
     }
 });
 
-
 /*
  * 
  * */
@@ -200,7 +125,18 @@ createClass({
 	_package            : "ticTacToe",
     _implements         : ["asg.board.Board"],
     
-    side                : {_type: "Number", _getter: true, _setter: true, _autoSet: true},
+    nbColumns           : {_type: "Number", _getter: true, _setter: true, _autoSet: true},
+    nbRows              : {_type: "Number", _getter: true, _setter: true, _autoSet: true},
+    
+    /*
+     * 
+     * */
+     getSlot            : {_type: "Method",
+        _method: function(_row, _column) {
+            return this.slots.get(_row + "/" + _column);
+        }
+    },
+            
     
     /*
      * 
@@ -208,28 +144,17 @@ createClass({
 	constructor         : {
         _type: "Method", _method: function(_p) {
             this.slots  =  new std.coll.MapArray();
-             
-            var i, j, id, n;
-            n = 0;
-            for(i = 0; i < this.side; i++) {
-                for(j = 0; j < this.side; j++) {
-                    id = i + "/" + j; n++;
-                    this.slots.set(new ticTacToe.Slot({id:id}), id);
+            
+            var i, j, id;
+            
+            for(i = 0; i < this.nbRows; i++) {
+                for(j = 0; j < this.nbColumns; j++) {
+                    id = i + "/" + j;
+                    this.slots.set(new asgMin.board.Slot({id:id}), id);
                 }
             }
         }
 	}
-});
-
-/*
- * 
- * */
-createClass({
-	_name           : "Slot",
-	_package        : "ticTacToe",
-    _implements     : ["asg.board.Slot"],
-    
-	occupants       : {_type: "std.coll.Collection", _getter:true, _setter: true}
 });
 
 /*
@@ -245,6 +170,7 @@ createClass({
      * */    
     pickPlayer          : {_type: "Method",
         _method: function() {
+    
             if (!implements("asg.actors.Player", this.playerTurn)) {
                 this.playerTurn = this.game.players.get("B");
             }
@@ -277,37 +203,33 @@ createClass({
      * 
      * */
     isMoveLegal     : {_type: "Method",
-        _method: function(_p) {
-            return true;
+        _method: function(_move) {
+            var action, slot;
+
+            action = _move.getAction();
+            if (implements("asg.actions.Action", action)) {                
+                slot = action.getSlot();
+                return slot.isFree();
+            }
+            return false;
         }
     },
             
     /*
      * 
      * */
-    constructor     : {_type: "Method",
-        _method: function(_p) {
-            
+    isGameOver      : {_type: "Method",
+        _method: function(_move) {
+            var action, slot;
+
+            action = _move.getAction();
+            if (implements("asg.actions.Action", action)) {                
+                slot = action.getSlot();
+                return slot.isFree();
+            }
+            return false;
         }
-    }
-});
-       
-       
-/*
- * 
- * */
- createClass({
-    _name           : "Player",
-    _package        : "ticTacToe",
-    
-    /*
-     * 
-     * */
-    constructor     : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    }
+    }    
 });
 
 /*
@@ -315,18 +237,8 @@ createClass({
  * */
  createClass({
     _name           : "PlayerUi",
-    _extends        : ["ticTacToe.Player"],
     _implements     : ["asg.actors.Player"],
     _package        : "ticTacToe",
-    
-    /*
-     *
-     * */
-    constructor     : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    },
     
     /*
      *
@@ -342,10 +254,23 @@ createClass({
      * */            
     play                : {_type: "Method", 
         _method: function(_p) {
+            var move,slot,pawn,action;
+
+            move    = new ticTacToe.Move();
+            slot    = this.game.board.getSlot(_p.row, _p.column);
+            pawn    = new asg.pawns.Pawn();
+            
+            move.setAction(new ticTacToe.ActionPut({move: move, slot: slot, pawn: pawn}));
+            
             // Trigger the 
-            if (this.game.referee.isMoveLegal()) {
+            if (this.game.referee.isMoveLegal(move)) {
+                
+                move.execute();
+                
+                this.game.addMove(move);
+                
                 if (implements("std.proc.Event",this.game.onPlay)) {
-                    this.game.onPlay.trigger({x: _p.x , y: _p.y, player: this});
+                    this.game.onPlay.trigger({column: _p.column , row: _p.row, player: this});
                 }
                 this.game.referee.turnOver();
             }
@@ -357,81 +282,18 @@ createClass({
  * 
  * */
  createClass({
-    _name           : "PlayerComputer",
-    _extends        : ["ticTacToe.Player"],            
-    _implements     : ["asg.actors.Player"],
-    _package        : "ticTacToe",
-    
-    /*
-     *
-     * */
-    constructor     : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    },
-    
-    /*
-     *
-     * */            
-    turn            : {_type: "Method",
-        _method: function() {
-
-        }
-    },
-    
-    /*
-     *
-     * */            
-    play            : {_type: "Method",
-        _method: function() {
-            
-        }
-    }
-});
-
-
-/*
- * 
- * */
- createClass({
     _name           : "Move",
     _package        : "ticTacToe",
-    _implements     : ["asg.actions.Move"],
-    
-    /*
-     * 
-     * */
-    isAllowed       : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    },
+    _implements     : ["asgMin.actions.Move"],
     
     /*
      * 
      * */
     execute         : {_type: "Method",
         _method: function(_p) {
-            
-        }
-    },
-    
-    /*
-     * 
-     * */
-    setAction       : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    },
-        
-    /*
-     * 
-     * */
-    constructor     : {_type: "Method",
-        _method: function(_p) {
-            
+            if (implements("asg.actions.Action", this.action)) {                
+                this.action.execute();
+            }
         }
     }
 });
@@ -440,35 +302,26 @@ createClass({
  * 
  * */
  createClass({
-    _name           : "PutAction",
+    _name           : "ActionPut",
     _package        : "ticTacToe",
-    _implements     : ["asg.actions.Action"],
+    _implements     : ["asgMin.actions.Action"],
     
-    x               : {_type: "Number", _getter: true, _setter: true},
-    y               : {_type: "Number", _getter: true, _setter: true},
-    
-    /*
-     * 
-     * */
-    isAllowed       : {_type: "Method",
-        _method: function(_p) {
-            
-        }
-    },
+    slot            : {_type: "asg.board.Slot", _getter: true, _setter: true, _autoSet: true},
+    pawn            : {_type: "asg.pawns.Pawn", _getter: true, _setter: true, _autoSet: true},
     
     /*
      * 
      * */
     execute         : {_type: "Method",
-        _method: function(_p) {
-            
+        _method: function() {
+            this.slot.setOccupant(this.pawn);
         }
     },
     
     /*
      * 
      * */
-    constructor     : {_type: "Method",
+    undo            : {_type: "Method",
         _method: function(_p) {
             
         }
