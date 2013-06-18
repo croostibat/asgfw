@@ -38,7 +38,7 @@ createClass({
 createClass({
     _name       : "Stack",
     _package    : "std.coll",
-    _virtual    : true,
+    _virtual    : "pure",
     
     head        : {_type: "Method", _method: null},
     tail        : {_type: "Method", _method: null},
@@ -55,7 +55,7 @@ createClass({
 createClass({
     _name           : "Collection",
     _package        : "std.coll",
-    _virtual        : true,
+    _virtual        : "pure",
     foreach         : {_type: "Method", _method: null},
     isSet           : {_type: "Method", _method: null},
     set             : {_type: "Method", _method: null},

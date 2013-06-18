@@ -9,7 +9,7 @@ createPackage("ui.std");
 createClass({
     _name               : "Stylable",
     _package            : "ui.base",
-    _virtual            : true,
+    _virtual            : "pure",
     
     classSys            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     class               : {_type: "String", _getter: true, _setter: true, _autoSet: true},
@@ -50,7 +50,7 @@ createClass({
 createClass({
     _name               : "Eventable",
     _package            : "ui.base",
-    _virtual            : true,
+    _virtual            : "pure",
        
 	onClick             : {_type: "std.proc.Event", _getter: true, _autoSet: true},   
     

@@ -1,31 +1,36 @@
 <html>
-    
     <head>
         <link href="../fw/default/ui.css" rel="stylesheet" type="text/css"/>
         <link href="../user/ticTacToe.css" rel="stylesheet" type="text/css"/>
+        
         <script LANGUAGE="Javascript" SRC="../fw/fw.js"> </script>
+        
         <script LANGUAGE="Javascript" SRC="../fw/lib/std.js"> </script>
         <script LANGUAGE="Javascript" SRC="../fw/lib/ui.js"> </script>
+        
         <script LANGUAGE="Javascript" SRC="../user/asg.js"> </script>
+        <script LANGUAGE="Javascript" SRC="../user/asgMin.js"> </script>
+        
         <script LANGUAGE="Javascript" SRC="../user/ticTacToe.js"> </script>
     </head>
-<body id="body">
-<script LANGUAGE="Javascript">
     
-    var body        = document.getElementById("body");    
-    
-    var game        = new ticTacToe.Game({side:5});
-    
-    game.setReferee(new ticTacToe.Referee());
-    game.setPlayer(new ticTacToe.PlayerUi({name:"Blanc", id: "B"}));
-    game.setPlayer(new ticTacToe.PlayerUi({name:"Noir", id: "N"}));
-    
-    var gameUi      = new ticTacToe.Ui({game: game, htmlHook: body});
-    var gameCtrl    = new ticTacToe.Controller({game: game, ui:gameUi});
-    
-    gameCtrl.draw({htmlHook: body});
-    game.start();
-   
-</script>
-</body>
+    <body id="body">
+        <script LANGUAGE="Javascript">
+            var body, game, gameUi, gameCtrl;
+            body        = document.getElementById("body");    
+            game        = new ticTacToe.Game({nbRows:5, nbColumns:5});
+            
+            game.setReferee(new ticTacToe.Referee());
+            game.addPlayer(new ticTacToe.PlayerUi({name:"Blanc", id: "B"}));
+            game.addPlayer(new ticTacToe.PlayerUi({name:"Noir", id: "N"}));
+            
+            gameUi      = new ticTacToe.Ui({game: game, htmlHook: body});
+            
+            gameCtrl    = new ticTacToe.Controller({game: game, ui:gameUi});
+            gameCtrl.draw({htmlHook: body});
+            
+            game.start();
+            
+        </script>
+    </body>
 </html>

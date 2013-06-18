@@ -167,7 +167,7 @@ var jsonize = function(_object,_parenthesis) {
  * @element _package(String, optional)
  * @element _implements([] of String, optionnal)
  * @element _extends([] of String, optionnal)
- * @element _virtual(Boolean, optional)
+ * @element _virtual(Strings, optional)
  * @element [a-z]{1}[A-Za-z_]* (@object classAttribute, *)
  * */
 
@@ -272,7 +272,7 @@ var createClass_extendsClass = function(_classDesc, _list,_work) {
                         break;
                         
                         case "_extends":
-                            if (_classDesc._virtual && !classDescToAdd._virtual) {
+                            if (_classDesc._virtual === "pure" && classDescToAdd._virtual !== "pure") {
                                 /* Add the class in extension mode */
                                 _work._errors.push("The virtual class " + _classDesc._name + " can't extends the non virtual class " + classNameToAdd + ".");
                             }
@@ -308,7 +308,7 @@ var createClass_addProperties = function(_classDesc, _type, _work) {
                 if (_classDesc[property]._type === "Method") {
                       /* Virtual Method 
                        * */
-                    if (_work._classDesc._virtual === false && _classDesc[property]._method === null) {
+                    if (_work._classDesc._virtual === "none" && _classDesc[property]._method === null) {                        
                        _work._virtualMethods[property] = { _classDesc: _classDesc};
                     }
                     /* Implemented method 
@@ -342,7 +342,7 @@ var createClass_addProperties = function(_classDesc, _type, _work) {
                         setter = "set" + property.charAt(0).toUpperCase() + property.substring(1);
                         /* The statics propertys are shared by all the instances of a class.
                          * So this kind of propertys are considered as prototype 
-                         * */        
+                         * */
                         root = (_classDesc[property]._static ? _classDesc._fullName + ".prototype." : root = "this.");
                         type = (_classDesc[property]._static ? "_proto" : "_const");
 
@@ -418,14 +418,19 @@ var createClass_parseDescription = function(_classDesc, _work) {
         _classDesc._package             = (_classDesc._package ? _classDesc._package : "");
         _classDesc._fullName            = (_classDesc._package ? _classDesc._package + "." : "") + _classDesc._name;
         _classDesc._constructorName     = "constructor_" + _classDesc._package.split(".").join("") + _classDesc._name;
-        _classDesc._virtual             = _classDesc._virtual ? _classDesc._virtual : false;
+        _classDesc._virtual             = _classDesc._virtual ? _classDesc._virtual : "none";
+        
+        if (_classDesc._virtual !== "none" && _classDesc._virtual !== "mixed"  && _classDesc._virtual !== "pure") {
+            _work._errors.push("the property _vritual must be 'none', 'mixed' or 'pure'");
+        }
+        
         if (isArray(_classDesc._implements) === false) {
             _work._errors.push("the property _implements is not an []");
         }
         if (isArray(_classDesc._extends) === false) {
             _work._errors.push("the property _extends is not an []");           
         }
-        if (isArray(_classDesc._implements) === true && _classDesc._virtual) {
+        if (isArray(_classDesc._implements) === true && _classDesc._virtual !== "none") {
             /* A virtual class cannot implement any class */
             _work._errors.push("The virtual class " + _classDesc._name + " can't implement any classes.");
         }
@@ -440,15 +445,15 @@ var createClass_parseDescription = function(_classDesc, _work) {
                         /* Virtual Method 
                          * */
                         if (_classDesc[property]._method === null) {
-                            if (!_classDesc._virtual) {
+                            if (!_classDesc._virtual === "none") {
                                 _work._errors.push("The non-vritual class " + _classDesc._name + "." + property + " can't own virtual method.");
                             }
                         }
                         /* Implemented method 
                          * */
                         else if (typeof(_classDesc[property]._method) === "function") {
-                            if (_classDesc._virtual) {
-                                _work._errors.push(_classDesc._name + "."+ property + " : a virtual class can't own implemented method");
+                            if (_classDesc._virtual === "pure") {
+                                _work._errors.push(_classDesc._name + "."+ property + " : a pure virtual class can't own implemented method");
                             }
                         }
                         else {
