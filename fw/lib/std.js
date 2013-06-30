@@ -9,20 +9,26 @@ createPackage("std.misc");
  * */
 createClass({
 	
-	_name		: "Node",
-    _package    : "std.chainer",
+    _name           : "Node",
+    _package        : "std.chainer",
     
-    children    : {_type: "std.coll.Collection", _getter: true},
-	parent		: {_type: "Object", _getter: true, _setter: true},
+    children        : {_type: "std.coll.Collection", _getter: true},
+    parent          : {_type: "*", _getter: true, _setter: true},
 	
-    addChild	: {_type: "Method", 
+    addChild        : {_type: "Method", 
         _method: function(_object) {
 	    	this.children.add(_object);
             _object.setParent(this);
     	}
     },
-    
-    constructor		: {_type: "Method", 
+            
+    getNbChildren   : {_type: "Method", 
+        _method: function(_object) {
+	    	return this.children.getLength();
+    	}
+    },
+            
+    constructor     : {_type: "Method", 
         _method: function(_p) {
     		this.children = new std.coll.MapArray({type:"std.Node"});
     	}
@@ -74,7 +80,8 @@ createClass({
     
     length          : {_type: "Number", _getter: true},    
     objects         : {_type: "Object", _getter: true},
-    type            : {_type: "String", _getter: true},
+    valType         : {_type: "String", _getter: true},
+    idxType         : {_type: "String", _getter: true},
     autoKey         : {_type: "Number"},
     
 	foreach         : {_type: "Method", 
@@ -82,28 +89,28 @@ createClass({
 			var key = null;
 			
 			if (isFunction(_fn)) {
-				for (key in this.objects) { 
+				for (key in this.objects) {
 					_fn(this[key],key,_params);
 				}
 			}
 		}
 	},
 	
-	isSet       : {_type: "Method", 
+	isSet       : {_type: "Method",
         _method: function(_key) {
 			return isDefined(this.objects[_key]);
 		}
 	},
 	
-	get         : {_type: "Method", 
+	get         : {_type: "Method",
         _method: function(_key) {
 			return this.objects[_key];
-		}	
+		}
 	},
 	
 	set 		: {_type: "Method", 
         _method: function(_object,_key) {
-			if (isDefined(_object) && (!this._type || is_type(_object,this._type))) {
+			if (isDefined(_object)) {
 				if (!this.isSet(_key)) {
 					this.length = this.length + 1;
 				}
@@ -112,7 +119,7 @@ createClass({
 			return null;
 		}
 	},
-    	
+    
 	add 		: {_type: "Method", 
         _method:function(_object) {
 			return this.set(_object, this.getAutoKey());
@@ -138,7 +145,7 @@ createClass({
         _method: function() {
 			var object = null;
 			if (this.isSet(_key)) {
-				this.length 	= this.length - 1;
+				this.length = this.length - 1;
 				object = this.objects[_key];
 				delete this.objects[_key];
 			}
@@ -168,23 +175,8 @@ createClass({
     _package        : "std.proc",
     
 	fn              : {_type: "Function", _getter: true, _setter: true, _autoSet: true},
-	context         : {_type: "*", _getter: true, _setter: true, _autoSet: true},
+    params          : {_type: "*", _getter: true, _setter: true, _autoSet: true},
     
-    addToContext    : {_type: "Method", 
-        _method: function(_name, _value) {
-            if (!this.context) {
-                this.context = {};
-            }
-            
-            if (!this.context[_name]) {
-                this.context[_name] = _value;
-                return true;
-            }                
-            
-            return false;
-		}
-    },
-            
     constructor : {_type: "Method", 
         _method : function(_p) {
             
@@ -194,13 +186,13 @@ createClass({
 	exec		: {_type: "Method", 
         _method: function(_params) {
 			if (instanceOf(this.fn) === "function") {
-				this.fn(_params);
+				this.fn(this.params, _params);
 			}
 		}
 	}
 });
 
-/* Fonction synchrone / asynchrone encapsul�es 
+/* Fonction synchrone / asynchrone encapsulées 
  * 
  * */
 createClass({
@@ -241,6 +233,34 @@ createClass({
     }
 });
 
+/*
+ * 
+ * */
+createClass({
+	
+	_name           : "AsyncFn",
+    _package        : "std.proc",
+    
+	fn              : {_type: "Function", _getter: true, _setter: true, _autoSet: true},
+    params          : {_type: "*", _getter: true, _setter: true, _autoSet: true},
+	context         : {_type: "*", _getter: true, _setter: true, _autoSet: true},
+    
+   
+    constructor : {_type: "Method", 
+        _method : function(_p) {
+            
+        }
+    },
+            
+	exec		: {_type: "Method", 
+        _method: function(_params) {
+			if (instanceOf(this.fn) === "function") {
+				this.fn(_params);
+			}
+		}
+	}
+});
+
 /* @class Event
  * 
  * */
@@ -250,7 +270,6 @@ createClass({
     /* @attributes
      * _p.callback (Procedure)  : the procedure to be set as the callback */
     callback            : {_type: "std.proc.Callback", _getter: true, _setter: true, _autoSet: true, _autoInstance: true},
-    context             : {_type: "*", _getter: true, _setter: true, _autoSet: true},
     /* @method constructor(_p)
      * _p.fn (Function, mandatory) : the main function to be called when the event will be triggered 
      * _p.params(*,optional): this object will be passed to the main function when the event will be triggered
@@ -280,15 +299,15 @@ createClass({
 /*****************************************************************************/
 /* MISC
 /*****************************************************************************/
+
 /*
  * 
  * */
 createClass({
 	
-	_name           : "Id",
+	_name           : "IdGenerator",
     _package        : "std.misc",
-	value           : {_type: "String", _getter: true},
-    
+	
     getRandomChar   : {_type: "Method", 
         _method: function() {
             var n = (Math.floor(Math.random() * 26)+65);
@@ -298,13 +317,7 @@ createClass({
     
     generate        : {_type: "Method", 
         _method: function() {
-            this.value = this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar()+this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar();
+            return this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar()+this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar() + this.getRandomChar();
         }
-    },
-    
-	constructor		: {_type: "Method", 
-        _method: function() {
-            this.generate();
-		}
-	}	
+    }
 });

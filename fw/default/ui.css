@@ -1,60 +1,56 @@
-
-
 div {
-    
-    margin : 0;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;    
+    margin : 0px;
     padding: 0px;
-
 }
 
 .uiContainerPane {
-
-}
-
-.spacer {
-    clear:both;
-    height:0;
-    width:0;
-    margin:0;
-    padding:0;
     
-    font-size:0px;
 }
 
-.uiContainerPaneV .uiContainerPane {
-    float   : none;
+.uiContainerColumn {
+    
 }
 
-.uiContainerPaneH .uiContainerPane{
-    display: inline;
-    float   : left;
+.uiContainerColumn .uiContainerPane {
+    
+}
+  
+.uiContainerRow {
+    display : table;
+    border-collapse:  collapse;
 }
 
-.uiContainerPaneS {
-
+.uiContainerRow .uiContainerPane{
+    display: table-cell;
+    vertical-align: top;
 }
 
-.uiContainerPaneS .uiContainerPane{
-    display: inline;
-    float   : left;
+.uiContainerGrid{
+    display :table;
+    border-collapse:  collapse;
 }
 
-.uiContainerPaneS .uiContainerPane:hover{
+.uiContainerGrid .uiContainerRow{
+    display :table-row;
+}
 
+.uiContainerGrid .uiContainerRow .uiContainerPane{
+    display :table-cell;
 }
 
 .uiStdButton {
     background-color:  #BBBBBB;
     border : 2px outset #BBBBBB;
     height : 20px;
-    
     cursor : pointer;
 }
 
 .uiStdButton .uiLabel {
     background-color:  transparent;
     text-align : center;
-    width : 100%;
     cursor : pointer;
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
@@ -75,9 +71,22 @@ div {
 
 
 .uiStdText {
+
     background-color:  transparent;
     text-align : center;
-    width : 100%;
+
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    
+}
+
+.uiStdText:hover {
+ 
+    background-color:  #f00;
+    text-align : center;
     
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
@@ -85,3 +94,6 @@ div {
     -o-user-select: none;
     user-select: none;
 }
+
+
+

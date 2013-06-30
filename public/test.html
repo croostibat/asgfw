@@ -1,5 +1,6 @@
 <html>
     <head>
+        
         <link href="../fw/default/ui.css" rel="stylesheet" type="text/css"/>
         <link href="../user/ticTacToe.css" rel="stylesheet" type="text/css"/>
         
@@ -14,21 +15,24 @@
         <script LANGUAGE="Javascript" SRC="../user/ticTacToe.js"> </script>
     </head>
     
-    <body id="body">
+        <body id="body">
+        <div id="game"></div>
+        <div id="log"></div>
+        
         <script LANGUAGE="Javascript">
             var body, game, gameUi, gameCtrl;
-            body        = document.getElementById("body");    
-            game        = new ticTacToe.Game({nbRows:5, nbColumns:5});
+            log         = document.getElementById("log");    
+            body        = document.getElementById("game");    
             
-            game.setReferee(new ticTacToe.Referee());
-            game.addPlayer(new ticTacToe.PlayerUi({name:"Blanc", id: "B"}));
-            game.addPlayer(new ticTacToe.PlayerUi({name:"Noir", id: "N"}));
+            game        = new asgMin.Game({nbRows:5, nbColumns:5});
+            gameUi      = new asgMin.Ui({htmlHook: body});
+            gameCtrl    = new asgMin.Controller({game: game, ui:gameUi});
             
-            gameUi      = new ticTacToe.Ui({game: game, htmlHook: body});
+            gameCtrl.getGame().setPlayer1(new ticTacToe.PlayerComputer({name:"Jaune"}));
+            gameCtrl.getGame().setPlayer2(new ticTacToe.PlayerComputer({name:"Rouge"}));
+            gameCtrl.getGame().setReferee(new ticTacToe.Referee());
             
-            gameCtrl    = new ticTacToe.Controller({game: game, ui:gameUi});
-            gameCtrl.draw({htmlHook: body});
-            
+            gameCtrl.draw();
             game.start();
             
         </script>

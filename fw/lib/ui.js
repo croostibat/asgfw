@@ -12,7 +12,7 @@ createClass({
     _virtual            : "pure",
     
     classSys            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
-    class               : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    css                 : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
     width               : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     height              : {_type: "String", _getter: true, _setter: true, _autoSet: true},    
@@ -61,11 +61,12 @@ createClass({
  * 
  * */
  createClass({
-	_name               : "Brick",
+    _name               : "Brick",
     _package            : "ui.base",
-	_extends            : ["std.chainer.Node","ui.base.Stylable","ui.base.Eventable"],
+    _extends            : ["std.chainer.Node","ui.base.Stylable","ui.base.Eventable"],
     
-    id                  : {_type: "std.Id", _getter: true},
+    id                  : {_type: "Id", _getter: true, _setter: true},    
+    index               : {_type: "Number", _getter: true, _setter: true},
     help                : {_type: "String", _getter: true, _autoSet: true},
     
     htmlHook            : {_type: "Object", _getter: true},
@@ -74,12 +75,11 @@ createClass({
     /* @method constructor 
      * @param _p ({}, mandatory)
      * @param _p.help 
-     * */    
+     * */
     constructor         : {_type: "Method", 
         _method: function(_p) {
             this.children       = new std.coll.MapArray();
             this.htmlHook       = _p.htmlHook;
-            this.id             = new std.misc.Id();
             
             if (isFunction(_p.onClick)) {
                 this.onClick = new std.proc.Event({fn:_p.onClick});
@@ -92,7 +92,7 @@ createClass({
      */
     setHtmlHook     : {_type: "Method", 
         _method: function(_htmlHook) {
-            if (_htmlHook && typeof(_htmlHook.appendChild) == "function") {
+            if (_htmlHook && typeof(_htmlHook.appendChild) === "function") {
                 this.htmlHook = _htmlHook;
                 this.htmlHook.appendChild(this.htmlFirstElement);                            
             }
@@ -104,19 +104,19 @@ createClass({
     applyStyles     : {_type: "Method", _overloadable   : true,
         _method  : function() {
             if (this.htmlFirstElement) {
-                var className = this.classSys + (this.classSys ? " " : "") + (this.class ? this.class : "");
+                var className = this.classSys + (this.classSys ? " " : "") + (this.css ? this.css : "");
                 
                 if (this.htmlFirstElement.className !== className) this.htmlFirstElement.className = className;
                 if (this.htmlFirstElement.style.width !== this.width) this.htmlFirstElement.style.width = this.width;
                 if (this.htmlFirstElement.style.height !== this.height) this.htmlFirstElement.style.height = this.height;
 
-                if (this.htmlFirstElement.style.padding !== this.padding) this.htmlFirstElement.style.padding = this.padding;
+                if (this.padding !== null && this.htmlFirstElement.style.padding !== this.padding) this.htmlFirstElement.style.padding = this.padding;
                 if (this.paddingTop !== null && this.htmlFirstElement.style.paddingTop !== this.paddingTop) this.htmlFirstElement.style.paddingTop = this.paddingTop;
                 if (this.paddingBottom !== null && this.htmlFirstElement.style.paddingBottom !== this.paddingBottom) this.htmlFirstElement.style.paddingBottom = this.paddingBottom;
                 if (this.paddingLeft !== null && this.htmlFirstElement.style.paddingLeft !== this.paddingLeft) this.htmlFirstElement.style.paddingLeft = this.paddingLeft;
                 if (this.paddingRight !== null && this.htmlFirstElement.style.paddingRight !== this.paddingRight) this.htmlFirstElement.style.paddingRight = this.paddingRight;
 
-                if (this.htmlFirstElement.style.margin !== this.margin) this.htmlFirstElement.style.margin = this.margin;
+                if (this.margin !== null && this.htmlFirstElement.style.margin !== this.margin) this.htmlFirstElement.style.margin = this.margin;
                 if (this.marginTop !== null && this.htmlFirstElement.style.marginTop !== this.marginTop) this.htmlFirstElement.style.marginTop = this.marginTop;
                 if (this.marginBottom !== null && this.htmlFirstElement.style.marginBottom !== this.marginBottom) this.htmlFirstElement.style.marginBottom = this.marginBottom;
                 if (this.marginLeft !== null && this.htmlFirstElement.style.marginLeft !== this.marginLeft) this.htmlFirstElement.style.marginLeft = this.marginLeft;
@@ -130,14 +130,31 @@ createClass({
                 if (this.borderColor !== null && this.htmlFirstElement.style.borderColor !== this.borderColor) this.htmlFirstElement.style.borderColor = this.borderColor;
                 if (this.color !== null && this.htmlFirstElement.style.color !== this.color) this.htmlFirstElement.style.color = this.color;
                 
-                if (this.htmlFirstElement.style.fontFamily !== this.fontFamily) this.htmlFirstElement.style.fontFamily = this.fontFamily;
-                if (this.htmlFirstElement.style.fontSize !== this.fontSize) this.htmlFirstElement.style.fontSize = this.fontSize;
-                if (this.htmlFirstElement.style.textAlign !== this.textAlign) this.htmlFirstElement.style.textAlign = this.textAlign;
+                if (this.fontFamily !== null && this.htmlFirstElement.style.fontFamily !== this.fontFamily) this.htmlFirstElement.style.fontFamily = this.fontFamily;
+                if (this.fontSize !== null && this.htmlFirstElement.style.fontSize !== this.fontSize) this.htmlFirstElement.style.fontSize = this.fontSize;
+                if (this.textAlign !== null && this.htmlFirstElement.style.textAlign !== this.textAlign) this.htmlFirstElement.style.textAlign = this.textAlign;
 
             }
         }
     },
+    
+    getPathIndex        : {_type: "Method", _overloadable   : true,
+        _method: function(_nbNode) {
             
+            var i, path, element;
+            
+            element = this;
+            path    = [];
+            i       = _nbNode ? _nbNode : 1;
+            while(i > 0) {
+                path[i-1] = element.getIndex();
+                element = element.getParent();
+                i--;
+            }
+            return path;
+        }
+    },
+    
     applyEvents       : {_type: "Method", _overloadable   : true,
         _method     : function() {
             
@@ -156,20 +173,20 @@ createClass({
  * 
  * */
 createClass({
-	_name               : "Element",
+    _name               : "Element",
     _package            : "ui.base",
-	_extends            : ["ui.base.Brick"],
+    _extends            : ["ui.base.Brick"],
     
     value               : {_type: "String", _getter: true, _autoSet: true},   
     
     applyValues         : {_type: "Method", _overloadable   : true,
-        _method     : function() {
+        _method : function() {
             if (this.htmlFirstElement.innerHTML !== this.value) this.htmlFirstElement.innerHTML = this.value;
         }
     },
     
     draw                : {_type: "Method", _overloadable   : true,
-        _method: function() {
+        _method : function() {
             this.applyEvents();
             this.applyStyles();
             this.applyValues();
@@ -181,26 +198,40 @@ createClass({
  *
  * */
 createClass({
-	_name               : "Container",
+    _name               : "Container",
     _package            : "ui.base",
-	_extends            : ["ui.base.Brick"],
+    _extends            : ["ui.base.Brick"],
     
     htmlHookChildren    : {_type: "Object", _getter: true, _setter: true},
-    coordinate          : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
     addUiElement        : {_type: "Method",
         _method: function(_element) {
             if (implements("ui.base.Brick",_element)) {
+                _element.setIndex(this.getNbChildren());
                 this.addChild(_element);
                 _element.setHtmlHook(this.getHtmlHookChildren());
             }
         }
     },
-            
-    draw            : {_type: "Method", _overloadable   : true,
+    
+    draw                : {_type: "Method", _overloadable   : true,
         _method: function() {
             this.applyEvents();
             this.applyStyles();
+        }
+    },
+    
+    getUiElement        : {_type: "Method", _overloadable   : true,
+        _method: function() {
+            var i, child;
+            
+            child = this;
+            for (i = 0; i < arguments.length; i++) {
+                if (implements("ui.base.Container",child));
+                child = child.getChildren().get(arguments[i]);
+                if (!child) return null;
+            }
+            return child;
         }
     }
 });
@@ -209,9 +240,9 @@ createClass({
  * 
  * */
 createClass({
-	_name 			: "Pane",
+    _name 			: "Pane",
     _package        : "ui.container",
-	_extends		: ["ui.base.Container"],
+    _extends		: ["ui.base.Container"],
 	
     constructor     : {_type: "Method", 
         _method : function(_p) {            
@@ -223,7 +254,7 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            this.htmlFirstElement = document.createElement("div");                 
+            this.htmlFirstElement = document.createElement("div");   
             this.setHtmlHookChildren(this.htmlFirstElement);
         }
     }
@@ -233,9 +264,9 @@ createClass({
  * 
  * */
 createClass({
-	_name 			: "PanesH",
+    _name           : "Row",
     _package        : "ui.container",
-	_extends		: ["ui.base.Container"],
+    _extends        : ["ui.base.Container"],
     
     nbColumns       : {_type: "Number", _autoSet: true},
     
@@ -243,7 +274,7 @@ createClass({
     
     constructor     : {_type: "Method", 
         _method: function(_p) {
-            this.setClassSys("uiContainerPaneH");
+            this.setClassSys("uiContainerRow");
             this.build();
             this.draw();
         }
@@ -251,42 +282,28 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            var pane, spacer, i;
+            var i;
             
-            this.htmlFirstElement = document.createElement("div");            
-            this.setHtmlHookChildren(this.htmlFirstElement);
-            
-            this.panesSettings          = (this.panesSettings ? this.panesSettings : {});
-            this.panesSettings.width    = (this.panesSettings.width ? this.panesSettings.width : Math.round(100 / this.nbColumns) + "%");
-            
+            this.htmlFirstElement   = document.createElement("div");            
+            this.setHtmlHookChildren(this.htmlFirstElement);            
+            this.panesSettings      = (this.panesSettings ? this.panesSettings : {});
             // Ajoute les différents panes
             for(i = 0; i < this.nbColumns; i++) {    
-                pane = new ui.container.Pane(this.panesSettings);
-                pane.setCoordinate(i + "," + "0");
-                this.children.set(pane,i);
-                this.addUiElement(pane);
+                this.addUiElement(new ui.container.Pane(this.panesSettings));
             }
-            
-            spacer = document.createElement("div");            
-            spacer.className = "spacer";
-            this.htmlFirstElement.appendChild(spacer);
-        }
-    },
-    
-    getPane    : {_type: "Method", 
-        _method : function(_column) {
-            return this.children.get(_column);
         }
     }
 });
+
+
 
 /* @class ui.container.PanesV
  * 
  * */
 createClass({
-	_name 			: "PanesV",
+    _name 			: "Column",
     _package        : "ui.container",
-	_extends		: ["ui.base.Container"],
+    _extends		: ["ui.base.Container"],
     
     nbRows          : {_type: "Number", _autoSet: true},
     
@@ -294,7 +311,7 @@ createClass({
     
     constructor     : {_type: "Method", 
         _method: function(_p) {;
-            this.setClassSys("uiContainerPaneV");
+            this.setClassSys("uiContainerColumn");
             this.build();
             this.draw();
         }
@@ -302,37 +319,24 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            var pane, spacer, i;
+            var i;
             
             this.htmlFirstElement = document.createElement("div");            
             this.setHtmlHookChildren(this.htmlFirstElement);
-            
             // Ajoute les différents panes
             for(i = 0; i < this.nbRows; i++) {
-                pane = new ui.container.Pane(this.panesSettings);
-                pane.setCoordinate("0" + "," + i);
-                this.children.set(pane,i);
-                this.addUiElement(pane);
+                this.addUiElement(new ui.container.Pane(this.panesSettings));
             }
-            
-            spacer = document.createElement("div");            
-            spacer.className = "spacer";
-            this.htmlFirstElement.appendChild(spacer);            
-        }
-    },
-    
-    getPane    : {_type: "Method", 
-        _method : function(_row) {
-            return this.children.get(_row);
         }
     }
 });
+
 
 /* @class ui.container.PanesS
  * 
  * */
 createClass({
-	_name 			: "PanesS",
+	_name 			: "Grid",
     _package        : "ui.container",
 	_extends		: ["ui.base.Container"],
     
@@ -343,7 +347,7 @@ createClass({
     
     constructor     : {_type: "Method", 
         _method: function(_p) {
-            this.setClassSys("uiContainerPaneS");
+            this.setClassSys("uiContainerGrid");
             this.build();
             this.draw();
         }
@@ -351,51 +355,14 @@ createClass({
     
     build           : {_type: "Method", 
         _method: function() {
-            var pane, spacer, i, j;
+            var i;
             
             this.htmlFirstElement = document.createElement("div");            
             this.setHtmlHookChildren(this.htmlFirstElement);
-                    
-            for(j = 0; j < this.nbColumns; j++) {
-                for(i = 0; i < this.nbRows; i++) {
-                    pane = new ui.container.Pane(this.panesSettings);
-                    pane.setCoordinate(i + "," + j);
-                    this.children.set(pane, i + ":" + j);
-                    this.addUiElement(pane);
-                }
             
-                spacer = document.createElement("div");            
-                spacer.className = "spacer";
-                this.htmlFirstElement.appendChild(spacer);
+            for(i = 0; i < this.nbRows; i++) {
+                this.addUiElement(new ui.container.Row({nbColumns:this.nbColumns, panesSettings:this.panesSettings}));
             }
-        }
-    },
-    
-    setRowHeight : {_type: "Method", 
-        _method : function(_row, _height) {
-            var i, pane;
-            for (i = 0; i < this.nbColumns; i++) {
-                pane = this.getPane(i, _row);
-                pane.setHeight(_height);
-                pane.draw();
-            }
-        }
-    },
-    
-    setColumnWidth : {_type: "Method", 
-        _method : function(_column, _width) {
-             var i, pane;
-            for (i = 0; i < this.nbRows; i++) {
-                pane = this.getPane(_column, i);
-                pane.setWidth(_width);
-                pane.draw();
-            }            
-        }
-    },
-    
-    getPane    : {_type: "Method", 
-        _method : function(_colum, _row) {
-            return this.children.get(_colum + ":" + _row);
         }
     }
 });
@@ -437,7 +404,7 @@ createClass({
     
     constructor		: {_type: "Method", 
         _method:function(_p) {
-            this.setClassSys("uiStdLabel");
+            this.setClassSys("uiStdText");
             this.build();
             this.draw();
 		}

@@ -12,8 +12,10 @@ createClass({
     _package        : "asg",
     _virtual        : "pure",
     
-    htmlHook        : {_type: "Object", _getter: true},
-    uiElement       : {_type: "ui.Element", _getter: true},
+    htmlHook        : {_type: "Object", _getter: true, _setter: true, _autoSet: true},
+    
+    rootUiElement   : {_type: "ui.Element", _getter: true},
+    boardUiElement  : {_type: "ui.Element", _getter: true},
     
     onSlotClick     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     
@@ -30,15 +32,11 @@ createClass({
     
     started             : {_type: "Boolean", _getter: true, _setter: true},
     
-    players             : {_type: "std.coll.Collection", _getter: true},
-    
     referee             : {_type: "asg.actors.Referee", _getter: true, _setter: true, _autoSet: true},
     board               : {_type: "asg.board.Board", _getter: true, _setter: true, _autoSet: true},
     
     currentMove         : {_type: "asg.actions.Move", _getter: true, _setter: true, _autoSet: true},
     firstMove           : {_type: "asg.actions.Move", _getter: true, _setter: true, _autoSet: true},
-    
-    moveNumber          : {_type: "Number", _getter: true, _setter: true, _autoSet: true},
     
     onPickPlayer        : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     onTurnOver          : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
@@ -47,7 +45,6 @@ createClass({
     start               : {_type: "Method", _method: null},
     stop                : {_type: "Method", _method: null},
     
-    addPlayer           : {_type: "Method", _method: null},
     addMove             : {_type: "Method", _method: null}
 });
 
@@ -73,9 +70,8 @@ createClass({
 	_package            : "asg.board",
     _virtual            : "pure",
     
-	slots               : {_type: "std.coll.Collection", _getter: true},
-  
-	constructor         : {_type: "Method", _method: null}
+	slots               : {_type: "std.coll.Collection"}
+    
 });
 
 /*
@@ -88,8 +84,8 @@ createClass({
     
     board           : {_type: "asg.board.Board", _getter: true},
     
-	id              : {_type: "String", _getter:true, _setter: true},
-	name            : {_type: "String", _getter:true, _setter: true}
+	id              : {_type: "String", _getter:true, _setter: true, _autoSet: true},
+	name            : {_type: "String", _getter:true, _setter: true, _autoSet: true}
 });
 
 /*
@@ -99,10 +95,10 @@ createClass({
 	_name           : "Pawn",
 	_package        : "asg.pawns",
     
-	id              : {_type: "String", _getter: true, _setter: true},
-	name            : {_type: "String", _getter: true, _setter: true},
+	id              : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+	name            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
-	player          : {_type: "asg.actors.Player", _getter: true, _setter: true}
+	player          : {_type: "asg.actors.Player", _getter: true, _setter: true, _autoSet: true}
 });
 
 /*
@@ -149,7 +145,7 @@ createClass({
     _package        : "asg.actions",
     _virtual        : "pure",
     
-    player          : {_type: "asg.actors.Player", _getter: true, _setter: true, _autoSet: true},
+    player          : {_type: "asg.actors.Player", _getter: true, _setter: true, _autoSet: true}
     
 });
 
