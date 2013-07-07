@@ -25,7 +25,37 @@ createClass({
             logUi.applyValues();
         }
     },
-      
+    /*
+     * 
+     * */
+     resetLog       : {_type: "Method", 
+        _method: function(_message) {
+            var logUi;
+            logUi = this.rootUi.getChildById("log");
+            logUi.setValue("");
+            logUi.applyValues();
+        }
+    },
+    
+    putPawn         : {_type: "Method", 
+        _method: function(_row, _column, _playerNumber) {
+            var slotUi;
+            slotUi = this.getBoardUi().getChildByPathIndex(_row,_column);
+            slotUi.setCss("slot slot_player_"+_playerNumber);
+            slotUi.applyStyles();
+        }
+    },
+    
+            
+    removePawn      : {_type: "Method", 
+        _method: function(_row, _column) {
+            var slotUi;
+            slotUi = this.getBoardUi().getChildByPathIndex(_row,_column);
+            slotUi.setCss("slot");
+            slotUi.applyStyles();
+        }
+    },
+    
     /*
      * 
      * */
@@ -40,7 +70,10 @@ createClass({
                 this.boardUi    = new ui.container.Grid({css: "board", nbRows:_p.nbRows, nbColumns:_p.nbColumns, panesSettings: {css: "slot", onClick: this.onSlotClick}});
                 
                 this.rootUi.getChildByPathIndex(0,0).addElement(this.boardUi);
-                this.rootUi.getChildByPathIndex(0,1).addElement(new ui.std.Text({id: "log", value:"smdlkf"}));
+                this.rootUi.getChildByPathIndex(0,1).addElement(new ui.std.Button({id: "bt", label:"Start", onClick: this.getOnClickStart()}));
+                this.rootUi.getChildByPathIndex(0,1).addElement(new ui.std.Button({id: "bt", label:"Stop", onClick: this.getOnClickStop()}));
+                this.rootUi.getChildByPathIndex(0,1).addElement(new ui.std.Button({id: "bt", label:"Init", onClick: this.getOnClickInit()}));
+                this.rootUi.getChildByPathIndex(0,1).addElement(new ui.std.Text({id: "log", value:""}));
                 this.rootUi.setHtmlHook(this.htmlHook);
             }
         }
@@ -61,11 +94,11 @@ createClass({
      * 
      * */
     setPlayer           : {_type: "Method",
-        _method : function(_player, _order){
-            if (implements("asg.actors.Player", _player) && isNumber(_order)) {
+        _method : function(_player, _number){
+            if (implements("asg.actors.Player", _player) && isNumber(_number) && _number >= 1) {
                 _player.setGame(this);
-                _player.setOrder(_order);
-                this.players.set(_player, _order);
+                _player.setNumber(_number);
+                this.players.set(_player, _number);
             }
         }
     },
@@ -74,9 +107,9 @@ createClass({
      * 
      * */
     getPlayer           : {_type: "Method",
-        _method : function(_order){
-            if (isNumber(_order)) {
-                return this.players.get(_order);
+        _method : function(_number){
+            if (isNumber(_number)) {
+                return this.players.get(_number);
             }
             return null;
         }
@@ -118,7 +151,18 @@ createClass({
      * */            
     isStartable         : {_type: "Method", 
         _method: function(_p) {
-            return true;
+            
+            var startable, nbPlayers, i;
+            
+            startable = true && implements("asgMin.actors.Referee", this.referee);
+            nbPlayers = this.getNbPlayers();
+            
+            for (i = 1; i <= nbPlayers; i++) {
+                 startable = startable && implements("asg.actors.Player", this.getPlayer(i));
+            }
+           
+                
+            return startable;
         }
     },
     
@@ -129,6 +173,9 @@ createClass({
         _method: function(_p) {
             if (!this.getStarted() && this.isStartable()) {
                 this.setStarted(true);
+                if (implements("std.proc.Event", this.onStart)) {
+                    this.onStart.trigger();
+                }
                 this.getReferee().pickPlayer();
             }
         }
@@ -139,9 +186,29 @@ createClass({
      * */            
     stop                : {_type: "Method", 
         _method: function(_p) {
+            
              if (this.getStarted()) {
-                 this.setStarted(false);
+                 
+                this.setStarted(false);
+                if (implements("std.proc.Event", this.onStop)) {
+                    this.onStop.trigger();
+                }
              }
+        }
+    },
+    
+    /*
+     * 
+     * */            
+    init                : {_type: "Method", 
+        _method: function(_p) {
+            if (implements("std.proc.Event", this.onInit)) {
+                
+                this.stop();
+                this.getReferee().initBoard();
+                
+                this.onInit.trigger();
+            }
         }
     },
     
@@ -163,7 +230,7 @@ createClass({
     _name               : "Controller",
     _implements         : ["asg.Controller"],
     _package            : "asgMin",
-  
+    
     /*
      * 
      * */    
@@ -171,6 +238,9 @@ createClass({
         _method: function(_ui) {
             this.ui = _ui;            
             this.ui.setOnSlotClick(new std.proc.Event({context:this, fnName:"onSlotClickFn"}));
+            this.ui.setOnClickStart(new std.proc.Event({context:this, fnName:"onClickStartFn"}));
+            this.ui.setOnClickStop(new std.proc.Event({context:this, fnName:"onClickStopFn", async: true}));
+            this.ui.setOnClickInit(new std.proc.Event({context:this, fnName:"onClickInitFn", async: true}));
         }
     },
     
@@ -183,6 +253,9 @@ createClass({
             _game.setOnPlay(new std.proc.Event({context:this, fnName:"onPlayFn"}));
             _game.setOnPickPlayer(new std.proc.Event({context:this, fnName:"onPickPlayerFn"}));
             _game.setOnMessage(new std.proc.Event({context:this, fnName:"onMessageFn"}));
+            _game.setOnStart(new std.proc.Event({context:this, fnName:"onStartFn"}));
+            _game.setOnStop(new std.proc.Event({context:this, fnName:"onStopFn"}));
+            _game.setOnInit(new std.proc.Event({context:this, fnName:"onInitFn"}));
             _game.setOnTurnOver(new std.proc.Event({context:this, fnName:null}));
         }
     },
@@ -216,17 +289,44 @@ createClass({
     /*
      * 
      * */
+    onClickStartFn  : {_type: "Method",
+        _method: function(_uiButton) {
+            this.getGame().start();
+        }
+    },
+    
+    /*
+     * 
+     * */
+    onClickStopFn   : {_type: "Method",
+        _method: function(_uiButton) {
+            this.getGame().stop();
+        }
+    },    
+    
+    /*
+     * 
+     * */
+    onClickInitFn   : {_type: "Method",
+        _method: function(_uiButton) {
+            this.getGame().init();
+            this.getUi().resetLog();
+        }
+    },
+    
+    /*
+     * 
+     * */
     onPlayFn        : {_type: "Method",
         _method: function(_p) {
-            
-            var boardUi    = this.getUi().getBoardUi();
-            var slotUi     = boardUi.getChildByPathIndex(_p.row,_p.column);
-
-            
-            slotUi.setCss("slot slot_player_"+_p.player.getOrder());
-            slotUi.applyStyles();
-            
-            
+            switch(_p.action) {
+                case "putPawn":                    
+                    this.getUi().putPawn(_p.row, _p.column, _p.playerNumber);
+                    break;
+                case "removePawn":
+                    this.getUi().removePawn(_p.row, _p.column, _p.playerNumber);
+                    break;
+            }
             this.getUi().addToLog(_p.row + "," + _p.column);
         }
     },
@@ -240,11 +340,41 @@ createClass({
         }
     },
     
+    /*
+     * 
+     * */
     onMessageFn     : {_type: "Method",
         _method: function(_p) {
             this.getUi().addToLog(_p.message);
         }
-    }
+    },
+    
+    /*
+     * 
+     * */
+    onStartFn       : {_type: "Method",
+        _method: function(_p) {
+            this.getUi().addToLog("Game started");
+        }
+    },
+    
+    /*
+     * 
+     * */
+    onStopFn        : {_type: "Method",
+        _method: function(_p) {
+            this.getUi().addToLog("Game stopped");
+        }
+    },
+    
+    /*
+     * 
+     * */
+    onInitFn        : {_type: "Method",
+        _method: function(_p) {
+            
+        }
+    }    
 });
 
 /*
@@ -279,13 +409,13 @@ createClass({
                 matrixBoard[i] = [];
                 for(j = 0; j < this.getNbColumns(); j++) {
                     slot = this.getSlot(i,j);
-                    matrixBoard[i][j] = (slot.getOccupant() !== null ? slot.getOccupant().getPlayer().getOrder() : "");
+                    matrixBoard[i][j] = (slot.getOccupant() !== null ? slot.getOccupant().getPlayer().getNumber() : "");
                 }
             }
             return matrixBoard;
         }
     },
-
+    
     /*
      * 
      * */
@@ -318,7 +448,6 @@ createClass({
     row             : {_type: "Number", _getter:true, _setter: true, _autoSet: true},
     column          : {_type: "Number", _getter:true, _setter: true, _autoSet: true},
     
-   
     /*
      * 
      * */
@@ -343,16 +472,18 @@ createClass({
      * */    
     pickPlayer          : {_type: "Method",
         _method: function() {
-    
-            var currentPlayer   = (implements("asg.actors.Player", this.playerTurn) ? ((this.playerTurn.getOrder() + 1) % this.getGame().getNbPlayers()) : 0);
+            var currentPlayer;
             
-            this.setPlayerTurn(this.getGame().getPlayer(currentPlayer));
-            if (implements("asg.actors.Player", this.getPlayerTurn())) {
-                // Trigger the onChoosePlayer event
-                if (implements("std.proc.Event",this.getGame().getOnPickPlayer())) {
-                    this.getGame().getOnPickPlayer().trigger({player:this.getPlayerTurn()});
+            if (this.getGame().getStarted()) {
+                currentPlayer = (implements("asg.actors.Player", this.playerTurn) ? (this.playerTurn.getNumber() % this.getGame().getNbPlayers()) + 1 : 1);
+                this.setPlayerTurn(this.getGame().getPlayer(currentPlayer));
+                if (implements("asg.actors.Player", this.getPlayerTurn())) {
+                    // Trigger the onChoosePlayer event
+                    if (implements("std.proc.Event",this.getGame().getOnPickPlayer())) {
+                        this.getGame().getOnPickPlayer().trigger({player:this.getPlayerTurn()});
+                    }
+                    this.getPlayerTurn().turn();
                 }
-                this.getPlayerTurn().turn();
             }
         }
     },            
@@ -364,16 +495,16 @@ createClass({
         _method: function(_p) {
             var state = this.isGameOver();
             switch(state) {
-                case -1: // Draw
+                case 0: // Draw
                     this.getGame().getOnMessage().trigger({message: "Draw!"});
-                    this.setPlayerTurn(null);
+                    this.getGame().stop();
                     break;
                 case null:
-                    (new std.proc.Event({fnName: "pickPlayer", context: this, async: true})).trigger();
+                    (new std.proc.Event({fnName: "pickPlayer", context: this, async: true})).trigger();                    
                     break;
                 default:
                     this.getGame().getOnMessage().trigger({message: "Player " + state + " win!"});
-                    this.setPlayerTurn(null);
+                    this.getGame().stop();
                     break;
             }
         }
@@ -389,19 +520,109 @@ createClass({
     _extends        : ["asg.actions.Move"],
     _virtual        : "mixed",
     
-    action          : {_type: "asg.actions.Action", _getter: true, _setter: true, _autoSet: true}
+    action          : {_type: "asg.actions.Action", _getter: true, _setter: true, _autoSet: true},
     
+    /*
+     * 
+     * */
+    doMove         : {_type: "Method",
+        _method: function(_p) {
+            if (implements("asg.actions.Action", this.action)) {                
+                this.action.doAction();
+            }
+        }
+    },
+    
+    /*
+     * 
+     * */
+    undoMove       : {_type: "Method",
+        _method: function(_p) {
+            if (implements("asg.actions.Action", this.action)) {                
+                this.action.undoAction();
+            }
+        }
+    }          
 });
 
 /*
  * 
  * */
  createClass({
-    _name           : "Action",
+    _name           : "Move",
+    _package        : "asgMin.actions",
+    _extends        : ["asg.actions.Move"],
+    _virtual        : "mixed",
+    
+    action          : {_type: "asg.actions.Action", _getter: true, _setter: true, _autoSet: true},
+    
+    /*
+     * 
+     * */
+    doMove         : {_type: "Method",
+        _method: function(_p) {
+            if (implements("asg.actions.Action", this.action)) {                
+                this.action.doAction();
+            }
+        }
+    },
+    
+    /*
+     * 
+     * */
+    undoMove       : {_type: "Method",
+        _method: function(_p) {
+            if (implements("asg.actions.Action", this.action)) {                
+                this.action.undoAction();
+            }
+        }
+    }          
+});
+
+/*
+ * 
+ * */
+createClass({
+    _name			: "Action",
     _package        : "asgMin.actions",
     _extends        : ["asg.actions.Action"],
-    _virtual        : "mixed",    
+    _virtual        : "mixed",
     
-    order           : {_type: "Number", _getter: true, _setter: true, _autoSet: true}
-    
+    /*
+     * 
+     * */
+    callOnPlay      : {_type: "Method",
+        _method: function(_action) {
+            
+            if ("std.proc.Event", game.getOnPlay()) {
+                game.getOnPlay().trigger({action: _action, row: this.getSlot().getRow(), column: this.getSlot().getColumn()});
+            }
+        }
+    }
 });
+
+/*
+ * 
+ * */
+createClass({
+    _name			: "ActionPlayer",
+    _package        : "asgMin.actions",
+    _extends        : ["asg.actions.ActionPlayer"],
+    _virtual        : "mixed",
+    
+    /*
+     * 
+     * */
+    callOnPlay      : {_type: "Method",
+        _method: function(_action) {
+            var game,player;
+            
+            player  = this.getMove().getPlayer();
+            game    = player.getGame();
+            if ("std.proc.Event", game.getOnPlay()) {
+                game.getOnPlay().trigger({action: _action, playerNumber: player.getNumber(), row: this.getSlot().getRow(), column: this.getSlot().getColumn()});
+            }
+        }
+    }
+});
+

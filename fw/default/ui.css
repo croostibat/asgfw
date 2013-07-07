@@ -39,6 +39,8 @@ div {
 
 .uiContainerGrid .uiContainerRow .uiContainerPane{
     display :table-cell;
+
+
 }
 
 .uiStdButton {
@@ -48,8 +50,9 @@ div {
     cursor : pointer;
 }
 
-.uiStdButton .uiLabel {
+.uiStdButton .uiStdText {
     background-color:  transparent;
+    overflow: hidden;
     text-align : center;
     cursor : pointer;
     -moz-user-select: -moz-none;
@@ -71,10 +74,14 @@ div {
 
 
 .uiStdText {
-
+    
+    width : 100%;
+    height : 100%;
+    overflow: scroll;
+    
     background-color:  transparent;
-    text-align : center;
-
+    text-align : left;
+    
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
@@ -82,18 +89,3 @@ div {
     user-select: none;
     
 }
-
-.uiStdText:hover {
- 
-    background-color:  #f00;
-    text-align : center;
-    
-    -moz-user-select: -moz-none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-
-
-

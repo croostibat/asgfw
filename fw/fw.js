@@ -122,9 +122,7 @@ var instanceOf = function(_object) {
     if (_object && _object._ && _object._._classDesc) {
         return  _object._._classDesc._fullName;
     }
-    else {
-        return typeof(_object);
-    }
+    return null;
 };
 
 /* @function jsonize

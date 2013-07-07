@@ -17,24 +17,25 @@
     
         <body id="body">
         <div id="game"></div>
-        <div id="log"></div>
         
         <script LANGUAGE="Javascript">
             var body, game, gameUi, gameCtrl;
-            log         = document.getElementById("log");    
             body        = document.getElementById("game");    
             
-            game        = new asgMin.Game({nbRows:5, nbColumns:5});
+            game        = new asgMin.Game({nbRows: 6, nbColumns: 6});
             gameUi      = new asgMin.Ui({htmlHook: body});
             gameCtrl    = new asgMin.Controller({game: game, ui:gameUi});
             
-            gameCtrl.getGame().setPlayer1(new ticTacToe.PlayerComputer({name:"Jaune"}));
-            gameCtrl.getGame().setPlayer2(new ticTacToe.PlayerComputer({name:"Rouge"}));
+            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Jaune"}),1);
+            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Rouge"}),2);
+            //gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),3);
+//            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),3);
+//            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),4);
+//            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),5);
+            
             gameCtrl.getGame().setReferee(new ticTacToe.Referee());
-            
             gameCtrl.draw();
-            game.start();
-            
+//            game.start();
         </script>
     </body>
 </html>

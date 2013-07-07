@@ -12,10 +12,38 @@
     background-color : #F55;
 }
 
-.slot_black {
-    background-color : #F00;
+.slot_player_5 {
+    background-color : #0FF;
 }
 
-.slot_white {
-     background-color : #FF0;
+.slot_player_4 {
+    background-color : #F0F;
+}
+
+.slot_player_3 {
+    background-color : #FF0;
+}
+
+.slot_player_2 {
+    background-color : #FF5;
+}
+
+.slot_player_1 {
+    background-color : #55F;
+}
+
+.slot_player_0 {
+     background-color : #F00;
+}
+
+#log {
+    border  : 1px solid black;
+    padding : 5px;
+    height  : 240px;
+    width   : 100px;
+    overflow: hidden;
+}
+
+#log:hover {
+    overflow: auto;
 }

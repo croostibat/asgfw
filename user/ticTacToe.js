@@ -7,7 +7,31 @@ createPackage("ticTacToe");
     _name           : "Referee",
     _package        : "ticTacToe",
     _implements     : ["asgMin.actors.Referee"],
-    
+          
+    /*
+     * 
+     * */
+    initBoard   : {_type: "Method",
+        _method: function() {
+            var nbRows, nbColumns, i, j, board, slot, action;
+            
+            board       = this.getGame().getBoard();
+            nbRows      = board.getNbRows();
+            nbColumns   = board.getNbColumns();
+            
+            for (i = 0; i < nbRows; i++) {
+                for (j = 0; j < nbColumns; j++) {
+                    slot    = board.getSlot(i, j);
+                    action  = new ticTacToe.ActionRemove({slot: slot});
+                    action.doAction();
+                }
+            }
+        }
+    },
+            
+    /*
+     * 
+     * */
     getLegalMoves   : {_type: "Method",
         _method: function() {
             var bMatrix, i, j, legalMove;
@@ -62,12 +86,12 @@ createPackage("ticTacToe");
                 nbColumns   = this.getGame().getBoard().getNbColumns();
 
                 this.getGame().getBoard().getBoardAsMatrix();
-
+                
                 win = true;
                 for(i = 0; i < nbColumns; i++) {
                     slot    = this.getGame().getBoard().getSlot(row,i);
                     if (slot.getOccupant() !== null) {
-                        win     = win && (slot.getOccupant().getPlayer().getId() === player.getId());
+                        win     = win && (slot.getOccupant().getPlayer().getNumber() === player.getNumber());
                     }
                     else {
                         win     = false;
@@ -75,20 +99,20 @@ createPackage("ticTacToe");
                 }
 
                 if (!win) {
+                    win = true;
                     for(i = 0; i < nbRows; i++) {
                         slot    = this.getGame().getBoard().getSlot(i,column);
                         if (slot.getOccupant() !== null) {
-                            win     = win && (slot.getOccupant().getPlayer().getId() === player.getId());
+                            win     = win && (slot.getOccupant().getPlayer().getNumber() === player.getNumber());
                         }
                         else {
                             win     = false;
                         }
                     }
                 }
-                if (win) {alert(player.getId())};
-                return win;
+                return (win ? player.getNumber() : (this.getLegalMoves().getLength() === 0 ? 0 : null));
             }
-            return false;
+            return null;
         }
     }    
 });
@@ -109,21 +133,17 @@ createPackage("ticTacToe");
         _method: function(_p) {
             var move,slot,pawn,action;
             
-            move    = new ticTacToe.Move({player: this});
+            
             slot    = this.getGame().getBoard().getSlot(_p.row, _p.column);
+            move    = new asgMin.actions.Move({player: this});
             pawn    = new asg.pawns.Pawn({player: this});
             
             move.setAction(new ticTacToe.ActionPut({move: move, slot: slot, pawn: pawn}));
-            
             // Trigger the 
             if (this.getGame().getReferee().isMoveLegal(move)) {                
-                move.execute();                
+                move.doMove();               
                 this.getGame().addMove(move);
                 this.getGame().getReferee().turnOver();
-                
-                 if (implements("std.proc.Event",this.getGame().onPlay)) {
-                    this.getGame().onPlay.trigger({column: _p.column , row: _p.row, player: this});
-                }
                 return true;
             }
             return false;
@@ -153,16 +173,17 @@ createPackage("ticTacToe");
      * */            
     play                : {_type: "Method",  
         _method: function() {
-    
+      
             var bMatrix, legalMoves, moveNb, moveXY;
             
-            bMatrix = this.getGame().getBoard().getBoardAsMatrix();
-            legalMoves = this.getGame().getReferee().getLegalMoves();
-            moveNb = Math.floor(Math.random() * legalMoves.getLength());            
-            
-            moveXY = legalMoves.get(moveNb);
-            log.innerHTML += moveNb + "/" + legalMoves.getLength() + "::" + moveXY.row + "," + moveXY.column + "</br>";
-            this.doMove({row:moveXY.row, column: moveXY.column});
+            bMatrix     = this.getGame().getBoard().getBoardAsMatrix();
+            legalMoves  = this.getGame().getReferee().getLegalMoves();
+            if (legalMoves.getLength() > 0) {
+                moveNb = Math.floor(Math.random() * legalMoves.getLength());     
+                
+                moveXY = legalMoves.get(moveNb);
+                this.doMove({row:moveXY.row, column: moveXY.column});
+            }
         }
     }
 });
@@ -198,17 +219,33 @@ createPackage("ticTacToe");
  * 
  * */
  createClass({
-    _name           : "Move",
+    _name           : "ActionPut",
     _package        : "ticTacToe",
-    _implements     : ["asgMin.actions.Move"],
+    _implements     : ["asgMin.actions.ActionPlayer"],
+    
+    slot            : {_type: "asg.board.Slot", _getter: true, _setter: true, _autoSet: true},
+    pawn            : {_type: "asg.pawns.Pawn", _getter: true, _setter: true, _autoSet: true},
     
     /*
      * 
      * */
-    execute         : {_type: "Method",
+    doAction        : {_type: "Method",
+        _method: function() {
+            if (this.pawn !== null) {
+                this.slot.setOccupant(this.pawn);
+                this.callOnPlay("putPawn");
+            }
+        }
+    },
+    
+    /*
+     * 
+     * */
+    undoAction      : {_type: "Method",
         _method: function(_p) {
-            if (implements("asg.actions.Action", this.action)) {                
-                this.action.execute();
+            if (this.slot.getOccupant() !== null) {
+                this.slot.setOccupant(null);
+                this.callOnPlay("removePawn");
             }
         }
     }
@@ -218,28 +255,33 @@ createPackage("ticTacToe");
  * 
  * */
  createClass({
-    _name           : "ActionPut",
+    _name           : "ActionRemove",
     _package        : "ticTacToe",
     _implements     : ["asgMin.actions.Action"],
     
     slot            : {_type: "asg.board.Slot", _getter: true, _setter: true, _autoSet: true},
-    pawn            : {_type: "asg.pawns.Pawn", _getter: true, _setter: true, _autoSet: true},
     
     /*
      * 
      * */
-    execute         : {_type: "Method",
+    doAction        : {_type: "Method",
         _method: function() {
-            this.slot.setOccupant(this.pawn);
+            if (this.slot.getOccupant() !== null) {
+                this.slot.setOccupant(null);
+                this.callOnPlay("removePawn");
+            }
         }
     },
     
     /*
      * 
      * */
-    undo            : {_type: "Method",
+    undoAction      : {_type: "Method",
         _method: function(_p) {
-            this.slot.setOccupant(null);
+             if (this.pawn !== null) {
+                this.slot.setOccupant(this.pawn);
+                this.callOnPlay("putPawn");
+            }
         }
     }
 });
