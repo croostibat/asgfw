@@ -19,23 +19,22 @@
         <div id="game"></div>
         
         <script LANGUAGE="Javascript">
-            var body, game, gameUi, gameCtrl;
-            body        = document.getElementById("game");    
+            var body, game, ui, controller;
+            body                = document.getElementById("game");    
             
-            game        = new asgMin.Game({nbRows: 6, nbColumns: 6});
-            gameUi      = new asgMin.Ui({htmlHook: body});
-            gameCtrl    = new asgMin.Controller({game: game, ui:gameUi});
+            game                = new asgMin.Game({nbRows: 3, nbColumns: 3});
+            gameUi              = new asgMin.Ui({htmlHook: body});
+            gameController      = new asgMin.Controller({game: game, ui: gameUi});
             
-            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Jaune"}),1);
-            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Rouge"}),2);
-            //gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),3);
+            game.setReferee(new ticTacToe.Referee());
+            game.setPlayer(new ticTacToe.PlayerComputer({name:"Jaune"}),1);
+            game.setPlayer(new ticTacToe.PlayerComputer({name:"Rouge"}),2);
 //            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),3);
 //            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),4);
 //            gameCtrl.getGame().setPlayer(new ticTacToe.PlayerComputer({name:"Bleu"}),5);
-            
-            gameCtrl.getGame().setReferee(new ticTacToe.Referee());
-            gameCtrl.draw();
-//            game.start();
+
+            gameController.draw();
+
         </script>
     </body>
 </html>

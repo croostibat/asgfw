@@ -12,16 +12,16 @@
     background-color : #F55;
 }
 
-.slot_player_5 {
-    background-color : #0FF;
+.slot_player_3 {
+    background-color : #000;
 }
 
 .slot_player_4 {
-    background-color : #F0F;
+    background-color : #5F5;
 }
 
-.slot_player_3 {
-    background-color : #FF0;
+.slot_player_5 {
+    background-color : #F55;
 }
 
 .slot_player_2 {
@@ -30,10 +30,6 @@
 
 .slot_player_1 {
     background-color : #55F;
-}
-
-.slot_player_0 {
-     background-color : #F00;
 }
 
 #log {

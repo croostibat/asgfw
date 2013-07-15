@@ -78,7 +78,6 @@ createClass({
      * */
     constructor         : {_type: "Method", 
         _method: function(_p) {
-            this.children       = new std.coll.MapArray();
             this.htmlHook       = _p.htmlHook;
             
             if (isFunction(_p.onClick)) {

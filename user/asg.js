@@ -2,25 +2,26 @@ createPackage("asg");
 createPackage("asg.board");
 createPackage("asg.actors");
 createPackage("asg.actions");
+createPackage("asg.comp");
 createPackage("asg.pawns");
 
 /*
  * 
  * */
 createClass({
-    _name           : "Ui",
-    _package        : "asg",
-    _virtual        : "pure",
+    _name               : "Ui",
+    _package            : "asg",
+    _virtual            : "pure",
     
-    htmlHook        : {_type: "Object", _getter: true, _setter: true, _autoSet: true},
-    rootUi          : {_type: "ui.Element", _getter: true},
+    htmlHook            : {_type: "Object", _getter: true, _setter: true, _autoSet: true},
+    rootUi              : {_type: "ui.Element", _getter: true},
     
-    onSlotClick     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    onClickStart    : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    onClickStop     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    onClickInit     : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onSlotClick         : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onClickStart        : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onClickStop         : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onClickInit         : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     
-    draw            : {_type: "Method", _method: null}
+    draw                : {_type: "Method", _method: null}
 });
 
 /*
@@ -31,7 +32,7 @@ createClass({
     _package            : "asg",
     _virtual            : "pure",
     
-    started             : {_type: "Boolean", _getter: true, _setter: true},
+    started             : {_type: "Boolean"},
     
     referee             : {_type: "asg.actors.Referee", _getter: true, _setter: true, _autoSet: true},
     board               : {_type: "asg.board.Board", _getter: true, _setter: true, _autoSet: true},
@@ -39,17 +40,14 @@ createClass({
     currentMove         : {_type: "asg.actions.Move", _getter: true, _setter: true, _autoSet: true},
     firstMove           : {_type: "asg.actions.Move", _getter: true, _setter: true, _autoSet: true},
     
-    onPickPlayer        : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    onTurnOver          : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     onPlay              : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     onMessage           : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onPickPlayer        : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onGameOver          : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
+    onTurnOver          : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     onStart             : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     onStop              : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
     onInit              : {_type: "std.proc.Event", _getter: true, _setter: true, _autoSet: true},
-    
-    start               : {_type: "Method", _method: null},
-    isStartable         : {_type: "Method", _method: null},
-    stop                : {_type: "Method", _method: null},
     
     addMove             : {_type: "Method", _method: null}
 });
@@ -98,25 +96,25 @@ createClass({
  * 
  * */
 createClass({
-	_name           : "Pawn",
-	_package        : "asg.pawns",
+	_name               : "Pawn",
+	_package            : "asg.pawns",
     
-	id              : {_type: "String", _getter: true, _setter: true, _autoSet: true},
-	name            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+	id                  : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+	name                : {_type: "String", _getter: true, _setter: true, _autoSet: true},
     
-	player          : {_type: "asg.actors.Player", _getter: true, _setter: true, _autoSet: true}
+	player              : {_type: "asg.actors.Player", _getter: true, _setter: true, _autoSet: true}
 });
 
 /*
  * 
  * */
 createClass({
-    _name           : "Actor",
-    _package        : "asg.actors",
-    _virtual        : "pure",
+    _name               : "Actor",
+    _package            : "asg.actors",
+    _virtual            : "pure",
     
-    name            : {_type: "String", _getter: true, _setter: true, _autoSet: true},
-    game            : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true}
+    name                : {_type: "String", _getter: true, _setter: true, _autoSet: true},
+    game                : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true}
     
 });
 
@@ -124,70 +122,105 @@ createClass({
  * 
  * */
 createClass({
-    _name           : "Player",
-    _package        : "asg.actors",
-    _extends        : ["asg.actors.Actor"],
-    _virtual        : "pure",
+    _name               : "Player",
+    _package            : "asg.actors",
+    _extends            : ["asg.actors.Actor"],
+    _virtual            : "pure",
     
-    number          : {_type: "Number", _getter: true, _setter: true, _autoSet: true},
+    number              : {_type: "Number", _getter: true, _setter: true, _autoSet: true},
     
-    turn            : {_type: "Method", _method: null},
-    play            : {_type: "Method", _method: null}
+    turn                : {_type: "Method", _method: null},
+    play                : {_type: "Method", _method: null}
 });
 
 /*
  * 
  * */
 createClass({
-    _name           : "Referee",
-    _package        : "asg.actors",
-    _extends        : ["asg.actors.Actor"],
-    _virtual        : "pure",
+    _name               : "Referee",
+    _package            : "asg.actors",
+    _extends            : ["asg.actors.Actor"],
+    _virtual            : "pure",
     
-    playerTurn      : {_type: "asg.actors.Player", _getter: true, _setter: true},
+    playerTurn          : {_type: "asg.actors.Player", _getter: true, _setter: true},
 
-    pickPlayer      : {_type: "Method", _method: null},
-    turnOver        : {_type: "Method", _method: null},
-    initBoard       : {_type: "Method", _method: null},
-    isMoveLegal     : {_type: "Method", _method: null},
-    isGameOver      : {_type: "Method", _method: null}
+    pickPlayer          : {_type: "Method", _method: null},
+    turnOver            : {_type: "Method", _method: null},
+    initGame            : {_type: "Method", _method: null},
+    isMoveLegal         : {_type: "Method", _method: null},
+    isGameOver          : {_type: "Method", _method: null},
+    
+    start               : {_type: "Method", _method: null},
+    isStartable         : {_type: "Method", _method: null},
+    stop                : {_type: "Method", _method: null}
+
 });
 
 /*
  * 
  * */
 createClass({
-    _name			: "Move",    
-    _package        : "asg.actions",
-    _virtual        : "pure",
+    _name               : "Mind",
+    _package            : "asg.comp",
+    _virtual            : "pure",
     
-    player          : {_type: "asg.actors.Player", _getter: true, _setter: true, _autoSet: true},
+    importData          : {_type: "Method", _method: null},
+    getLegalMoves       : {_type: "Method", _method: null},
+    isMoveLegal         : {_type: "Method", _method: null},
+    isGameOver          : {_type: "Method", _method: null},
+    findBestMove        : {_type: "Method", _method: null}
+    
+});
+
+/*
+ * 
+ * */
+createClass({
+    _name               : "Move",    
+    _package            : "asg.actions",
+    _virtual            : "pure",
+    
+    player              : {_type: "asg.actors.Actor", _getter: true, _setter: true, _autoSet: true},
         
-    doMove          : {_type: "Method", _method: null},
-    undoMove        : {_type: "Method", _method: null}
+    doMove              : {_type: "Method", _method: null},
+    undoMove            : {_type: "Method", _method: null}
 });
 
 /*
  * 
  * */
 createClass({
-    _name			: "Action",
-    _package        : "asg.actions",
-    _virtual        : "pure",
-        
-    doAction        : {_type: "Method", _method: null}
+    _name               : "Action",
+    _package            : "asg.actions",
+    _virtual            : "pure",
+    
+    doAction            : {_type: "Method", _method: null},
+    undoAction          : {_type: "Method", _method: null}
 });
 
 /*
  * 
  * */
 createClass({
-    _name			: "ActionPlayer",
-    _package        : "asg.actions",
-    _extends        : ["asg.actions.Action"],
-    _virtual        : "pure",
+    _name               : "ActionPlayer",
+    _package            : "asg.actions",
+    _extends            : ["asg.actions.Action"],
+    _virtual            : "pure",
     
-    move            : {_type: "asg.actions.Move", _getter: true, _setter: true, _autoSet: true},
+    move                : {_type: "asg.actions.Move", _getter: true, _setter: true, _autoSet: true}
     
-    undoAction      : {_type: "Method", _method: null}
+});
+
+
+/*
+ * 
+ * */
+createClass({
+    _name               : "ActionReferee",
+    _package            : "asg.actions",
+    _extends            : ["asg.actions.Action"],
+    _virtual            : "pure",
+    
+    game                : {_type: "asg.Game", _getter: true, _setter: true, _autoSet: true}
+    
 });

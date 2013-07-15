@@ -57,7 +57,7 @@ createClass({
      * */
     constructor		: {_type: "Method", 
         _method: function(_p) {
-    		this.children = new std.coll.MapArray({type:"std.Node"});
+    		this.children = new std.coll.IdxArray({type:"std.chainer.Node"});
     	}
     }
 });
@@ -89,6 +89,7 @@ createClass({
     _name           : "Collection",
     _package        : "std.coll",
     _virtual        : "pure",
+    
     foreach         : {_type: "Method", _method: null},
     isSet           : {_type: "Method", _method: null},
     set             : {_type: "Method", _method: null},
@@ -100,7 +101,6 @@ createClass({
  * 
  * */
 createClass({
-	
 	_name           : "MapArray",
     _package        : "std.coll",
     _implements     : ["std.coll.Collection"],
@@ -109,6 +109,107 @@ createClass({
     objects         : {_type: "Object", _getter: true},
     valType         : {_type: "String", _getter: true},
     idxType         : {_type: "String", _getter: true},
+    /*
+     * 
+     * */
+	foreach         : {_type: "Method",
+        _method: function(_fn, _params) {
+			var key, ret;
+            
+            key = null; ret = null;
+			if (isFunction(_fn)) {
+				for (key in this.objects) {
+					ret = _fn(this.objects[key],key,_params);
+                    if (isDefined(ret) && ret !== null) {
+                        return ret;
+                    }
+				}
+			}
+            return null;
+		}
+	},
+
+    /*
+     * 
+     * */
+	get         : {_type: "Method",
+        _method: function(_key) {
+			return (isDefined(this.objects[_key]) ? this.objects[_key] : null);
+		}
+	},
+	
+    /*
+     * 
+     * */
+	set 		: {_type: "Method", 
+        _method: function(_object,_key) {
+			if (isDefined(_object) && this.isSettable(_object,_key)) {
+                if (!this.isSet(_key)) {
+					this.length = this.length + 1;
+				}
+				this.objects[_key] 	= _object; return _key;		
+			}
+			return null;
+		}
+	},
+ 	
+    /*
+     * 
+     * */
+	isSet       : {_type: "Method",
+        _method: function(_key) {
+			return isDefined(this.objects[_key]);
+		}
+	},
+	   
+    /*
+     * 
+     * */
+    isSettable  : {_type: "Method", 
+        _method: function(_object, _key) {
+            return ((this.valType === "*" || implements(this.valType, _object)) && (this.idxType === "*" || implements(this.idxType, _key)));
+        }
+    },
+    
+    /*
+     * 
+     * */
+	drop 		: {_type: "Method", 
+        _method: function(_key) {
+			var object = null;
+			if (this.isSet(_key)) {
+				this.length = this.length - 1;
+				object = this.objects[_key];
+				delete this.objects[_key];
+			}
+			return object;
+		}
+	},
+	
+    /*
+     * 
+     * */
+	constructor : {_type: "Method", 
+        _method: function(_p) {
+            this.length     = 0;
+            this.objects    = {};
+            this.valType    = (this.valType ? this.valType : "*");
+            this.idxType    = (this.idxType ? this.idxType : "*");
+		}
+	}
+});
+
+/*
+ * 
+ * */
+createClass({
+	_name           : "IdxArray",
+    _package        : "std.coll",
+    _implements     : ["std.coll.Collection"],
+    
+    length          : {_type: "Number", _getter: true},    
+    objects         : {_type: "Object", _getter: true},
+    valType         : {_type: "String", _getter: true},
     autoKey         : {_type: "Number"},
     
     /*
@@ -118,7 +219,7 @@ createClass({
         _method: function(_fn, _params) {
 			var key, ret;
             
-            key = null; 
+            key = null;
             ret = null;
 			if (isFunction(_fn)) {
 				for (key in this.objects) {
@@ -135,12 +236,24 @@ createClass({
     /*
      * 
      * */
-	isSet       : {_type: "Method",
-        _method: function(_key) {
-			return isDefined(this.objects[_key]);
+	add 		: {_type: "Method", 
+        _method:function(_object) {
+			return this.set(_object, this.getAutoKey());
 		}
 	},
-	
+    
+    /*
+     * 
+     * */
+    getAutoKey     : {_type: "Method", 
+        _method: function() {
+            while(this.isSet(this.autoKey)) {
+                this.autoKey++;
+            }
+            return this.autoKey;
+        }
+    },
+    
     /*
      * 
      * */
@@ -168,30 +281,18 @@ createClass({
     /*
      * 
      * */
-	add 		: {_type: "Method", 
-        _method:function(_object) {
-			return this.set(_object, this.getAutoKey());
+	isSet       : {_type: "Method",
+        _method: function(_key) {
+			return isDefined(this.objects[_key]);
 		}
 	},
-    
-    /*
-     * 
-     * */
-    getAutoKey     : {_type: "Method", 
-        _method: function() {
-            while(this.isSet(this.autoKey)) {
-                this.autoKey++;
-            }
-            return this.autoKey;
-        }
-    },
-    
+	
     /*
      * 
      * */
     isSettable  : {_type: "Method", 
-        _method: function(_object) {
-            return (this.type || (instanceOf(_object,this.type)));
+        _method: function(_object, _key) {
+            return ((this.valType === "*" || implements(this.valType, _object)) && implements("Number", _key));
         }
     },
     
@@ -199,7 +300,7 @@ createClass({
      * 
      * */
 	drop 		: {_type: "Method", 
-        _method: function() {
+        _method: function(_key) {
 			var object = null;
 			if (this.isSet(_key)) {
 				this.length = this.length - 1;
@@ -217,12 +318,10 @@ createClass({
         _method: function(_p) {
             this.length     = 0;
             this.objects    = {};
-            this.type       = _p.type;
             this.autoKey    = 0;
 		}
 	}
 });
-
 
 
 /*****************************************************************************/
@@ -243,7 +342,6 @@ createClass({
  * 
  * */
 createClass({
-	
 	_name           : "FnNoctx",
     _package        : "std.proc",
     _implements     : ["std.proc.Fn"],
@@ -275,7 +373,6 @@ createClass({
  * 
  * */
 createClass({
-	
 	_name           : "FnCtx",
     _package        : "std.proc",
     _implements     : ["std.proc.Fn"],
@@ -371,7 +468,6 @@ createClass({
  * 
  * */
 createClass({
-	
 	_name           : "IdGenerator",
     _package        : "std.misc",
 	
